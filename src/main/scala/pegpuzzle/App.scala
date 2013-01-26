@@ -83,8 +83,15 @@ object App {
   /**
    * Get the content (peg or empty) at a board location
    */
-  def getSlotContent(board: Board, loc: Location): Char =
-    board(loc.r - 1)(loc.c - 1)
+  def getSlotContent(board: Board, loc: Location): Char = {
+    println("xxx")
+    println(loc)
+    println(board)
+    println(loc.r - 1)
+    println(loc.c - 1)
+    println(board(loc.r - 1)(loc.c - 1))
+    board(loc.r - 1)(loc.c - 1)  
+  }
 
   /**
    * Does this board location contain a peg?
@@ -109,10 +116,11 @@ object App {
 
   /**
    * Confirm that loc is a valid location on board
+   * Remember: the row number is also the width of the row
    */ 
   def isValidLocation(board: Board, loc: Location): Boolean = {
-    val l = 0            // lower limit
-    val u = board.size+1 // upper limit
+    val l = 0           // lower limit
+    val u = loc.r + 1   // upper limit
 
     (loc.r > l) && (loc.r < u) && (loc.c > l) && (loc.c < u)
   }
@@ -222,6 +230,9 @@ object App {
     // ensure target loc is a real location on the board
     // doesn't have a peg in it
     // and the loc between it and the start position does have a peg
+    println("Looking at: " + loc)
+    println(genPotentialDestinations(loc))
+    println(genPotentialDestinations(loc).filter(x => isValidLocation(board, x)))
 
     def cullInvalid(it: Location): Boolean = 
       isValidLocation(board, it) &&
@@ -281,7 +292,7 @@ object App {
 
 /*
  *  things to try/do
- *  1) I don't think rotational symmetry is enough.  I think reflective 
+ *  1) I am not sure rotational symmetry is enough.  I think reflective 
  *     symmetry is also an issue.  In other words do these have the same
  *     solution?  In a sense, no, since the exact set of moves can't be 
  *     applied.  But to a human being the steps are going to look awfully
