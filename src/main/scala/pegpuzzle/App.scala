@@ -33,17 +33,20 @@ object App {
     override def toString = "From: " + source + " To: " + target
   }
 
+  object SlotVal extends Enumeration {
+    type SlotVal = Value
+    val p = Value    // peg
+    val e = Value    // empty
+  }
+  import SlotVal._
+
   // Because we are doing random access lookup on boards
   // it would be more efficient to store them as arrays.
   // For now I am going to stick with lists until I have 
   // the solution working.
-  type Row = List[Char]
-  type Board = List[List[Char]]
+  type Row = List[SlotVal]
+  type Board = List[Row]
   type BoardList = List[Board]
-  type SlotContent = Char
-
-  val e = 'e' // empty slot
-  val p = 'p' // peg
 
   /*
    * Turn board counter clockwise until left edge becomes bottom edge.
@@ -70,14 +73,14 @@ object App {
     def rotateBoardReverse(board: Board): Board = {
       val sz = board.size
 
-      def rotateDiag(srcRow: Int, srcCol: Int): List[Char] = {
+      def rotateDiag(srcRow: Int, srcCol: Int): Row = {
         if (srcRow > sz) Nil
-        else board(srcRow - 1)(srcCol - 1) :: rotateDiag(srcRow+1, srcCol)
+        else board(srcRow - 1)(srcCol - 1) :: rotateDiag(srcRow + 1, srcCol)
       }
 
       def rotateDiagRows(srcRow: Int, srcCol: Int): Board = {
         if (srcCol > sz) Nil
-        else rotateDiag(srcRow, srcCol) :: rotateDiagRows(srcRow+1, srcCol+1) 
+        else rotateDiag(srcRow, srcCol) :: rotateDiagRows(srcRow + 1, srcCol + 1) 
       }
       rotateDiagRows(1, 1)
     }
@@ -87,7 +90,7 @@ object App {
   /**
    * Get the content (peg or empty) at a board location
    */
-  def getSlotContent(board: Board, loc: Location): Char = {
+  def getSlotContent(board: Board, loc: Location): SlotVal = {
     board(loc.r - 1)(loc.c - 1)  
   }
 
@@ -106,7 +109,7 @@ object App {
    */
   def between(loc1: Location, loc2: Location): Location = {
     def getOffset(i: Int, j: Int): Int = 
-      if (i == j) i else (i min j)+1
+      if (i == j) i else (i min j) + 1
 
     val c = if (loc1.c == loc2.c) loc1.c else (loc1.c min loc2.c) + 1
     Location(getOffset(loc1.r, loc2.r), getOffset(loc1.c, loc2.c))
@@ -133,9 +136,9 @@ object App {
    * applying a move to a board.  At that point emptyLoc should
    * probably become a list.
    */
-  def mkrow(edgesize: Int, emptyLoc: Location) : List[Char] = {
-    def addRowElements(rowNum: Int, colNum: Int) : List[Char] = {
-      if (colNum == rowNum+1) Nil
+  def mkrow(edgesize: Int, emptyLoc: Location) : Row = {
+    def addRowElements(rowNum: Int, colNum: Int) : Row = {
+      if (colNum == rowNum + 1) Nil
       else {
         val id = if (Location(rowNum, colNum) == emptyLoc) e else p
         id :: addRowElements(rowNum, colNum + 1)
@@ -266,18 +269,22 @@ object App {
    */ 
   def applyMove(board: Board, move: Move): Board = {
 
-    def slotVal(colNum: Int, rowNum: Int): SlotContent = 
-      if (Location(rowNum, colNum) == move.source) e 
-      else if (Location(rowNum, colNum) == move.target) p
-      else board(rowNum-1)(colNum-1)
+    def slotVal(rowNum: Int, colNum: Int): SlotVal = {
+      val loc = Location(rowNum, colNum)
 
-    def upd(col: Int, row: Row, accu: Row): Row =
-      if (row == Nil) accu
-      else slotVal(col, row.size) :: upd(col+1, row, accu)
+      if (loc == move.source) e 
+      else if (loc == move.target) p
+      else getSlotContent(board, loc)
+    }
 
-    def updateRow(row: Row): Row =
-      upd(1, row, Nil)
+    // get values for each slot in a row from left to right
+    def upd(row: Row, col: Int, accu: Row): Row =
+      if (col > row.size) accu
+      else slotVal(row.size, col) :: upd(row, col + 1, accu)
 
+    def updateRow(row: Row): Row = upd(row, 1, Nil)
+
+    // update each of the rows in a board
     board.map(updateRow)
   }
 
@@ -305,17 +312,6 @@ object App {
  *    println(x)
  *  }
  */
-
-  // half baked, semi automated test
-  def testRotate() = {
-    val a = List(List(p),List(p,p),List(p,e,p),List(p,e,e,p),List(p,p,p,p,p))
-    val b = rotateBoard(a)
-    val c = List(a, b)
-    val d = c.toSet
-    println(c)
-    println(d)
-    println(compareBoards(a, b))
-  }
 }
 
 /*
@@ -338,20 +334,21 @@ object App {
  *  4) Write unit tests
  *  5) See if the routines that generate lists backwards can be rewritten
  *     to do them forwards from the start
- *  6) Translate to Clojure
- *  7) Translate to Java 8
- *  8) Translate to Java 7
- *  9) Translate to Smalltalk? (Bigger project.  I don't know Smalltalk at all.)
- * 10) See if you can come up with a reduction of a board configuration list
+ *  6) Apply more object oriented approaches to the types
+ *  7) Translate to Clojure
+ *  8) Translate to Java 8
+ *  9) Translate to Java 7
+ * 10) Translate to Smalltalk? (Bigger project.  I don't know Smalltalk at all.)
+ * 11) See if you can come up with a reduction of a board configuration list
  *     to a single value that is the same for all three rotations of the 
  *     same board.
- * 11) Find out if dups can be filtered out before (or while) building
+ * 12) Find out if dups can be filtered out before (or while) building
  *     all permutations 
- * 12) Consider memoization so we can recognize failed paths more rapidly.
+ * 13) Consider memoization so we can recognize failed paths more rapidly.
        Does this puzzle become intractable as the board size grows?
- * 13) Convert this to parallel code.
- * 14) Consider converting the lists to arrays for direct element access
- * 15) I need to understand the conversions that happen behind the scenes
+ * 14) Convert this to parallel code.
+ * 15) Consider converting the lists to arrays for direct element access
+ * 16) I need to understand the conversions that happen behind the scenes
  *     requiring me, for example, to invoke tolist in mkAllBoards
  */
 
