@@ -116,7 +116,7 @@ object App {
    */ 
   def isValidLocation(board: Board, loc: Location): Boolean = {
     val l = 0           // lower limit
-    val u = loc.r + 1   // upper limit
+    val u = board.size  // upper limit
 
     (loc.r > l) && (loc.r < u) && (loc.c > l) && (loc.c < u)
   }
@@ -226,10 +226,6 @@ object App {
     // ensure target loc is a real location on the board
     // doesn't have a peg in it
     // and the loc between it and the start position does have a peg
-    println("Looking at: " + loc)
-    println(board)
-    println(genPotentialDestinations(loc))
-    println(genPotentialDestinations(loc).filter(x => isValidLocation(board, x)))
 
     def cullInvalid(it: Location): Boolean = 
       isValidLocation(board, it) &&
@@ -257,7 +253,7 @@ object App {
    * Find all solutions to the puzzle represented by "board"
    */ 
   def solveBoard(board: Board): List[Move] = {
-    val loc = Location(5, 1)
+    val loc = Location(5, 4)
     println("Moves from: " + loc)
     println(findMoves(board, loc))
     Nil
