@@ -25,7 +25,9 @@ package pegpuzzle
  */
 object App {
   
-  case class Location(r: Int, c: Int)
+  case class Location(r: Int, c: Int) {
+    override def toString = "(Row: " + r + ", Col: " + c + ")"
+  }
 
   case class Move(source: Location, target: Location) {
     override def toString = "From: " + source + " To: " + target
@@ -84,12 +86,6 @@ object App {
    * Get the content (peg or empty) at a board location
    */
   def getSlotContent(board: Board, loc: Location): Char = {
-    println("xxx")
-    println(loc)
-    println(board)
-    println(loc.r - 1)
-    println(loc.c - 1)
-    println(board(loc.r - 1)(loc.c - 1))
     board(loc.r - 1)(loc.c - 1)  
   }
 
@@ -97,7 +93,7 @@ object App {
    * Does this board location contain a peg?
    */
   def occupied(board: Board, loc: Location): Boolean =
-    if (getSlotContent(board, loc) == p) true else false
+    getSlotContent(board, loc) == p
 
   /**
    * Assume abs(loc1.r - loc2.r) == 2 or zero
@@ -231,6 +227,7 @@ object App {
     // doesn't have a peg in it
     // and the loc between it and the start position does have a peg
     println("Looking at: " + loc)
+    println(board)
     println(genPotentialDestinations(loc))
     println(genPotentialDestinations(loc).filter(x => isValidLocation(board, x)))
 
@@ -260,7 +257,9 @@ object App {
    * Find all solutions to the puzzle represented by "board"
    */ 
   def solveBoard(board: Board): List[Move] = {
-    println(findMoves(board, Location(2, 1)))
+    val loc = Location(5, 1)
+    println("Moves from: " + loc)
+    println(findMoves(board, loc))
     Nil
   }
 
