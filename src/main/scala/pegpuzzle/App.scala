@@ -37,8 +37,10 @@ object App {
   // it would be more efficient to store them as arrays.
   // For now I am going to stick with lists until I have 
   // the solution working.
+  type Row = List[Char]
   type Board = List[List[Char]]
   type BoardList = List[Board]
+  type SlotContent = Char
 
   val e = 'e' // empty slot
   val p = 'p' // peg
@@ -250,12 +252,42 @@ object App {
   }
 
   /**
+   * Count the occupied slots on a board
+   */
+  def countPegs(board: Board): Int = {
+    def pegsInRow(row: Row): Int = 
+      row.foldLeft(0)((i, j) => if (j == p) i + 1 else i)
+
+    board.foldLeft(0)((x, y) => x + pegsInRow(y))
+  }
+
+  /**
+   * Apply a move to a board and return the resulting board
+   */ 
+  def applyMove(board: Board, move: Move): Board = {
+
+    def slotVal(colNum: Int, rowNum: Int): SlotContent = 
+      if (Location(rowNum, colNum) == move.source) e 
+      else if (Location(rowNum, colNum) == move.target) p
+      else board(rowNum-1)(colNum-1)
+
+    def upd(col: Int, row: Row, accu: Row): Row =
+      if (row == Nil) accu
+      else slotVal(col, row.size) :: upd(col+1, row, accu)
+
+    def updateRow(row: Row): Row =
+      upd(1, row, Nil)
+
+    board.map(updateRow)
+  }
+
+  /**
    * Find all solutions to the puzzle represented by "board"
    */ 
   def solveBoard(board: Board): List[Move] = {
     val loc = Location(5, 4)
-    println("Moves from: " + loc)
-    println(findMoves(board, loc))
+    val moves = findMoves(board, loc)
+    println(applyMove(board, moves.head))
     Nil
   }
 
@@ -263,6 +295,7 @@ object App {
 
   def main(args : Array[String]) {
     solveBoard(mkBoards(5).head)
+    print(countPegs(mkBoards(5).head))
   }
 
 /*
@@ -293,10 +326,10 @@ object App {
  *     applied.  But to a human being the steps are going to look awfully
  *     similar.
  *     
- *         p            p	
- *        e p	       p e	
- *       p p p	      p p p	
- *      p p p p	     p p p p	
+ *         p            p       
+ *        e p          p e      
+ *       p p p        p p p     
+ *      p p p p      p p p p    
  *     p p p p p    p p p p p
  *     
  *  2) Can you do a rotation using only map and other list operations
