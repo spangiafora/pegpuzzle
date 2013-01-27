@@ -25,6 +25,9 @@ package pegpuzzle
  */
 object App {
   
+  // I use the terms Location and Slot more or less interchangeably.  Typically
+  // I use Slot when I am interested in the contents, and Location when I am
+  // interested in the position on the board.
   case class Location(r: Int, c: Int) {
     override def toString = "(Row: " + r + ", Col: " + c + ")"
   }
@@ -124,10 +127,11 @@ object App {
    * Remember: the row number is also the width of the row
    */ 
   def isValidLocation(board: Board, loc: Location): Boolean = {
-    val l = 0           // lower limit
-    val u = board.size  // upper limit
+    val l = 0             // lower limit
+    val ru = board.size   // upper limit on row
+    val cu = loc.r        // upper limit on col
 
-    (loc.r > l) && (loc.r < u) && (loc.c > l) && (loc.c < u)
+    (loc.r > l) && (loc.r < ru) && (loc.c > l) && (loc.c < cu)
   }
 
   /*
@@ -174,12 +178,22 @@ object App {
     b2.exists(b => compareBoards(b, b1))
   }
 
-  // construct all possible boards for this edgesize
+  /** construct all possible boards for this edgesize */
   def mkAllBoards(edgesize: Int) = {
     val l = for {
       x <- 1 to edgesize;
       y <- 1 to x;
       z = mkboard(edgesize, Location(x, y))
+    } yield z
+    l.toList
+  }
+
+  /** construct all possible boards for this edgesize */
+  def getAllBoardLocations(edgesize: Int) = {
+    val l = for {
+      x <- 1 to edgesize;
+      y <- 1 to x;
+      z = Location(x, y)
     } yield z
     l.toList
   }
@@ -212,26 +226,31 @@ object App {
   /**
    * Given a location, generate a list of the targets of all 
    * possible moves.  Note: The result list may contain invalid
-   * locations.  These can be filtered later.
+   * locations.
    */
-  def genPotentialDestinations(loc: Location): List[Location] = 
+  def genPotentialDestinations(loc: Location): List[Location] = {
     List(Location(loc.r - 2, loc.c - 2),
          Location(loc.r - 2, loc.c + 2),
          Location(loc.r,     loc.c - 2),
          Location(loc.r,     loc.c + 2),
          Location(loc.r + 2, loc.c - 2),
          Location(loc.r + 2, loc.c + 2))
+  }
 
+  /**
+   * ensure target loc is a real location on the board
+   * and doesn't have a peg in it
+   * and the start location does have a peg in it
+   * and the loc between them does have a peg
+   */
   def getTargetLocations(board: Board, loc: Location): List[Location] = {
 
-    // ensure target loc is a real location on the board
-    // doesn't have a peg in it
-    // and the loc between it and the start position does have a peg
-
-    def cullInvalid(it: Location): Boolean = 
+    def cullInvalid(it: Location): Boolean = {
       isValidLocation(board, it) &&
-      (!(occupied(board, it))) && 
+      (occupied(board, loc))     &&
+      (!(occupied(board, it)))   && 
       occupied(board, between(loc, it))
+    }
 
     genPotentialDestinations(loc).filter(cullInvalid)
   }  
@@ -286,14 +305,21 @@ object App {
    *  <li>have an occupied slot between them and the location
    * </ul>
    */    
-  def findMoves(board: Board, loc: Location): List[Move] = {
+  def findMoves(board: Board)(loc: Location): List[Move] = {
     def locToMove(l: Location): Move =  Move(loc, l)
     getTargetLocations(board, loc).map(locToMove)
   }
 
   /**
+   * Find all moves from all starting positions on a board
+   */
+  def findAllMoves(board: Board): List[Move] = {
+    val locs = getAllBoardLocations(board.size)
+    locs.flatMap(findMoves(board))
+  }
+
+  /**
    * Find all solutions to the puzzle represented by "board"
-   */ 
   def solveBoard(board: Board): List[Move] = {
     val loc = Location(5, 4)
     val moves = findMoves(board, loc)
@@ -311,10 +337,14 @@ object App {
   }
 
 //  def solveBoards(boards: BoardList): List
+   */ 
 
   def main(args : Array[String]) {
-    solveBoard(mkBoards(5).head)
-    print(pegsOnBoard(mkBoards(5).head))
+    // solveBoard(mkBoards(5).head)
+    //println(pegsOnBoard(mkBoards(5).head))
+    println(findAllMoves(mkBoards(5).head))
+    println(findAllMoves(mkBoards(5).tail.head))
+
   }
 }
 
