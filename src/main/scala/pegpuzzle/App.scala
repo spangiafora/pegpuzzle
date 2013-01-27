@@ -327,16 +327,25 @@ object App {
     def solve(board: Board, accu: Set[Move]): Set[Move] = {
       val moves = findAllMoves(board)
 
+      println(moves)
       if (moves isEmpty) {
-	if (pegsOnBoard(board) == 1) accu
-	else Nil.toSet
+	if (pegsOnBoard(board) == 1) {
+          accu
+        }
+	else {
+
+// take this output and the list of moves and apply them on the wooden
+// board and see what happens
+
+          println("Spop: " + board)
+          Nil.toSet
+        }
       }
       else {
         (for {
           m <- moves;
           v = solve(applyMove(board, m), accu + m)
         } yield v).flatten.toSet
-
       }
     }
 
