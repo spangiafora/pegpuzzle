@@ -112,11 +112,10 @@ object App {
    * Return the location of the slot between the two locations
    */
   def between(loc1: Location, loc2: Location): Location = {
-    def getOffset(i: Int, j: Int): Int = 
-      if (i == j) i else (i min j) + 1
-
     val c = if (loc1.c == loc2.c) loc1.c else (loc1.c min loc2.c) + 1
-    Location(getOffset(loc1.r, loc2.r), getOffset(loc1.c, loc2.c))
+    val r = (loc1.r min loc2.r) + 1
+
+    Location(r, c)
   }
 
   /**
