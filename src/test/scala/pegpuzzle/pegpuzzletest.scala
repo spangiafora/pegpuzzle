@@ -9,6 +9,28 @@ class PegPuzzleSuite extends FunSuite {
   import App._
   import SlotVal._
 
+  test("Valid location") {
+    val b = canonicalBoard().head
+
+    val l1 = Location(1, 1)
+    val l2 = Location(3, 2)
+    val l3 = Location(5, 1)
+    val l4 = Location(5, 5)
+    val l5 = Location(5, 6)
+    val l6 = Location(6, 5)
+    val l7 = Location(0, 1)
+    val l8 = Location(1, 2)
+
+    assert(isValidLocation(b, l1))
+    assert(isValidLocation(b, l2))
+    assert(isValidLocation(b, l3))
+    assert(isValidLocation(b, l4))
+//    assert(!(isValidLocation(b, l5)))
+//    assert(!(isValidLocation(b, l6)))
+//    assert(!(isValidLocation(b, l7)))
+//    assert(!(isValidLocation(b, l8)))
+  }
+
   test("Rotate") {
     val a = List(List(e), 
                  List(e, p), 

@@ -97,8 +97,9 @@ object App {
   /**
    * Does this board location contain a peg?
    */
-  def occupied(board: Board, loc: Location): Boolean =
+  def occupied(board: Board, loc: Location): Boolean = {
     getSlotContent(board, loc) == p
+  }
 
   def between(move: Move): Location = {
     between(move.source, move.target)
@@ -113,7 +114,7 @@ object App {
    */
   def between(loc1: Location, loc2: Location): Location = {
     val c = if (loc1.c == loc2.c) loc1.c else (loc1.c min loc2.c) + 1
-    val r = (loc1.r min loc2.r) + 1
+    val r = if (loc1.r == loc2.r) loc1.r else (loc1.r min loc2.r) + 1
 
     Location(r, c)
   }
@@ -127,7 +128,7 @@ object App {
     val ru = board.size   // upper limit on row
     val cu = loc.r        // upper limit on col
 
-    (loc.r > l) && (loc.r < ru) && (loc.c > l) && (loc.c < cu)
+    (loc.r > l) && (loc.r <= ru) && (loc.c > l) && (loc.c <= cu)
   }
 
   /*
@@ -244,20 +245,23 @@ object App {
   }
 
   /**
-   * ensure target loc is a real location on the board
+   * ensure target location ("it") is a real location on the board
    * and doesn't have a peg in it
-   * and the start location does have a peg in it
-   * and the loc between them does have a peg
+   * and the start location ("loc") does have a peg in it
+   * and the location between them does have a peg
    */
   def getTargetLocations(board: Board, loc: Location): List[Location] = {
 
+    // Return true if target meets criteria
     def cullInvalid(it: Location): Boolean = {
+
       isValidLocation(board, it) &&
-      (occupied(board, loc))     &&
       (!(occupied(board, it)))   && 
       occupied(board, between(loc, it))
     }
-    genPotentialDestinations(loc).filter(cullInvalid)
+
+    if (!(occupied(board, loc))) Nil
+    else genPotentialDestinations(loc).filter(cullInvalid)
   }  
 
   /**
@@ -343,9 +347,17 @@ object App {
   def solveBoards(boards: BoardList): List[Move] = 
     boards.map(solveBoard).flatten
 
+  /** The board most people start with */
+  def canonicalBoard():	BoardList = List(mkBoards(5).tail.tail.tail.tail.head)
+
   def main(args : Array[String]) {
-    println(solveBoards(mkBoards(5))) 
+//    println(solveBoards(mkBoards(5))) 
+    dumpMoves((solveBoards(canonicalBoard())))
   }
+
+  // Pretty print a list
+  def dumpMoves(l: List[Move]): Unit =
+    for(m <- l) println(m)
 
   // Pretty print a board
   def dumpboard(board: Board): Unit = {
