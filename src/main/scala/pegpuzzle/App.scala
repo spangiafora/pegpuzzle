@@ -237,20 +237,6 @@ object App {
   }  
 
   /**
-   * Given a position on the board, find locations that
-   * <ul>
-   *  <li>are unoccupied
-   *  <li>are on the board
-   *  <li>are two spaces from the location horizontally or diagonally
-   *  <li>have an occupied slot between them and the location
-   * </ul>
-   */    
-  def findMoves(board: Board, loc: Location): List[Move] = {
-    def locToMove(l: Location): Move =  Move(loc, l)
-    getTargetLocations(board, loc).map(locToMove)
-  }
-
-  /**
    * Count the occupied slots on a board
    */
   def pegsOnBoard(board: Board): Int = {
@@ -292,13 +278,29 @@ object App {
   }
 
   /**
+   * Given a position on the board, find locations that
+   * <ul>
+   *  <li>are unoccupied
+   *  <li>are on the board
+   *  <li>are two spaces from the location horizontally or diagonally
+   *  <li>have an occupied slot between them and the location
+   * </ul>
+   */    
+  def findMoves(board: Board, loc: Location): List[Move] = {
+    def locToMove(l: Location): Move =  Move(loc, l)
+    getTargetLocations(board, loc).map(locToMove)
+  }
+
+  /**
    * Find all solutions to the puzzle represented by "board"
    */ 
-  def solveBoard(board: Board): Option[List[Move]] = {
+  def solveBoard(board: Board): List[Move] = {
     val loc = Location(5, 4)
     val moves = findMoves(board, loc)
 
-// need terminating condition and recursive step
+    def solveSub(board: Board): Option[List[Move]] = 
+      if (moves isEmpty) 
+
 
 // define internal method that returns Option[List[Move]] 
 // and have outer just return List[Move]
