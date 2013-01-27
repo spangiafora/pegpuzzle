@@ -1,6 +1,3 @@
-// THIS PROGRAM IS UNDER CONSTRUCTION.  IT DOES NOT CURRENTLY WORK, AND IF IT DID
-// IT WOULD NOT YET DO WHAT IT IS INTENDED TO DO.
-//
 package pegpuzzle
 
 /**
@@ -230,11 +227,21 @@ object App {
    */
   def genPotentialDestinations(loc: Location): List[Location] = {
     List(Location(loc.r - 2, loc.c - 2),
-         Location(loc.r - 2, loc.c + 2),
+         Location(loc.r - 2, loc.c    ),
          Location(loc.r,     loc.c - 2),
          Location(loc.r,     loc.c + 2),
-         Location(loc.r + 2, loc.c - 2),
+         Location(loc.r + 2, loc.c    ),
          Location(loc.r + 2, loc.c + 2))
+  }
+
+  /**
+   * Count the occupied slots on a board
+   */
+  def pegsOnBoard(board: Board): Int = {
+    def pegsInRow(row: Row): Int = 
+      row.foldLeft(0)((i, j) => if (j == p) i + 1 else i)
+
+    board.foldLeft(0)((x, y) => x + pegsInRow(y))
   }
 
   /**
@@ -251,19 +258,8 @@ object App {
       (!(occupied(board, it)))   && 
       occupied(board, between(loc, it))
     }
-
     genPotentialDestinations(loc).filter(cullInvalid)
   }  
-
-  /**
-   * Count the occupied slots on a board
-   */
-  def pegsOnBoard(board: Board): Int = {
-    def pegsInRow(row: Row): Int = 
-      row.foldLeft(0)((i, j) => if (j == p) i + 1 else i)
-
-    board.foldLeft(0)((x, y) => x + pegsInRow(y))
-  }
 
   /**
    * Given a position on the board, find locations that
@@ -323,21 +319,15 @@ object App {
    * Find all solutions to the puzzle represented by "board"
    */ 
   def solveBoard(board: Board): Set[Move] = {
-
+    dumpboard(board)
     def solve(board: Board, accu: Set[Move]): Set[Move] = {
       val moves = findAllMoves(board)
 
-      println(moves)
       if (moves isEmpty) {
 	if (pegsOnBoard(board) == 1) {
           accu
         }
 	else {
-
-// take this output and the list of moves and apply them on the wooden
-// board and see what happens
-
-          println("Spop: " + board)
           Nil.toSet
         }
       }
@@ -348,7 +338,6 @@ object App {
         } yield v).flatten.toSet
       }
     }
-
     solve(board, Nil.toSet)
   }
 
@@ -356,7 +345,24 @@ object App {
     boards.map(solveBoard).flatten
 
   def main(args : Array[String]) {
-    println(solveBoards(mkBoards(5)))
+    println(solveBoards(mkBoards(5))) 
+  }
+
+  // Pretty print a board
+  def dumpboard(board: Board): Unit = {
+    def db(b: Board, i: Int): Unit = {
+      if (b isEmpty) return
+      else {
+        for(x <- 1 to i) print(" ") 
+        for (y <- b.head) {
+          print(y)
+          print(" ")
+        }
+        println()
+         db(b.tail, i - 1)
+      }
+    }
+    db(board, board.size * 2)
   }
 }
 
