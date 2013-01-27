@@ -150,7 +150,7 @@ object App {
   /*
    * Build a board up by row starting at the base (the widest part)
    */
-  def mkboard(edgesize: Int, emptyLoc: Location) : Board = {
+  def mkBoard(edgesize: Int, emptyLoc: Location) : Board = {
     def makeReverseBoard(edgesize: Int): Board = 
       if (edgesize == 0) Nil
       else mkrow(edgesize, emptyLoc) :: makeReverseBoard(edgesize - 1)
@@ -179,7 +179,7 @@ object App {
     val l = for {
       x <- 1 to edgesize;
       y <- 1 to x;
-      z = mkboard(edgesize, Location(x, y))
+      z = mkBoard(edgesize, Location(x, y))
     } yield z
     l.toList
   }
