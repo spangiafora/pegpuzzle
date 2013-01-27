@@ -266,37 +266,6 @@ object App {
   }
 
   /**
-   * Apply a move to a board and return the resulting board
-   * After the move:
-   * <ul>
-   *   <li>Source slot will be empty
-   *   <li>Target slot will be occupied
-   *   <li>Slot between them will be empty
-   * </ul>
-   */ 
-  def applyMove(board: Board)(move: Move): Board = {
-
-    def slotVal(rowNum: Int, colNum: Int): SlotVal = {
-      val loc = Location(rowNum, colNum)
-
-      if (loc == move.source) e 
-      else if (loc == move.target) p
-      else if (loc == between(move)) e
-      else getSlotContent(board, loc)
-    }
-
-    // get values for each slot in a row from left to right
-    def upd(row: Row, col: Int, accu: Row): Row =
-      if (col > row.size) accu
-      else slotVal(row.size, col) :: upd(row, col + 1, accu)
-
-    def updateRow(row: Row): Row = upd(row, 1, Nil)
-
-    // update each of the rows in a board
-    board.map(updateRow)
-  }
-
-  /**
    * Given a position on the board, find locations that
    * <ul>
    *  <li>are unoccupied
@@ -319,32 +288,66 @@ object App {
   }
 
   /**
-   * Find all solutions to the puzzle represented by "board"
-  def solveBoard(board: Board): List[Move] = {
-    val loc = Location(5, 4)
-    val moves = findMoves(board, loc)
+   * Apply a move to a board and return the resulting board
+   * After the move:
+   * <ul>
+   *   <li>Source slot will be empty
+   *   <li>Target slot will be occupied
+   *   <li>Slot between them will be empty
+   * </ul>
+   */ 
+  def applyMove(board: Board, move: Move): Board = {
 
-    def solveSub(board: Board): Option[List[Move]] = 
-      if (moves isEmpty) 
+    // calculate the new value for a board position
+    def slotVal(rowNum: Int, colNum: Int): SlotVal = {
+      val loc = Location(rowNum, colNum)
 
+      if (loc == move.source) e 
+      else if (loc == move.target) p
+      else if (loc == between(move)) e
+      else getSlotContent(board, loc)
+    }
 
-// define internal method that returns Option[List[Move]] 
-// and have outer just return List[Move]
+    // get values for each slot in a row from left to right
+    def upd(row: Row, col: Int, accu: Row): Row =
+      if (col > row.size) accu
+      else slotVal(row.size, col) :: upd(row, col + 1, accu)
 
-    val subboards = moves.map(applyMove(board))
-    subboards.flatMap(solveBoard)
-    None
+    def updateRow(row: Row): Row = upd(row, 1, Nil)
+
+    // update each of the rows in a board
+    board.map(updateRow)
   }
 
-//  def solveBoards(boards: BoardList): List
+  /**
+   * Find all solutions to the puzzle represented by "board"
    */ 
+  def solveBoard(board: Board): Set[Move] = {
+
+    def solve(board: Board, accu: Set[Move]): Set[Move] = {
+      val moves = findAllMoves(board)
+
+      if (moves isEmpty) {
+	if (pegsOnBoard(board) == 1) accu
+	else Nil.toSet
+      }
+      else {
+        (for {
+          m <- moves;
+          v = solve(applyMove(board, m), accu + m)
+        } yield v).flatten.toSet
+
+      }
+    }
+
+    solve(board, Nil.toSet)
+  }
+
+  def solveBoards(boards: BoardList): List[Move] = 
+    boards.map(solveBoard).flatten
 
   def main(args : Array[String]) {
-    // solveBoard(mkBoards(5).head)
-    //println(pegsOnBoard(mkBoards(5).head))
-    println(findAllMoves(mkBoards(5).head))
-    println(findAllMoves(mkBoards(5).tail.head))
-
+    println(solveBoards(mkBoards(5)))
   }
 }
 
