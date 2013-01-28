@@ -321,9 +321,10 @@ object App {
   /**
    * Find all solutions to the puzzle represented by "board"
    */ 
-  def solveBoard(board: Board): Set[Move] = {
-    dumpboard(board)
-    def solve(board: Board, accu: Set[Move]): Set[Move] = {
+  def solveBoard(accu: List[Move])(board: Board): List[List[Move]] = {
+    Nil  // FixMe: stubbed so it will build and the tests can run
+/*
+    def solve(board: Board, accu: List[Move]): List[List[Move]] = {
       val moves = findAllMoves(board)
 
       if (moves isEmpty) {
@@ -335,24 +336,29 @@ object App {
         }
       }
       else {
-        (for {
-          m <- moves;
-          v = solve(applyMove(board, m), accu + m)
-        } yield v).flatten.toSet
-      }
+        val boards = for {
+                       m <- moves;
+                       b = applyMove(board, m)
+                     } yield b
+        solveBoards(boards, m :: accu)
+      } 
     }
-    solve(board, Nil.toSet)
+    solve(board, Nil)
+ */
   }
 
-  def solveBoards(boards: BoardList): List[Move] = 
-    boards.map(solveBoard).flatten
+  def solveBoards(boards: BoardList, accu: List[Move]): List[List[Move]] = {
+    Nil // FixMe
+    // boards.map(solveBoard(accu))
+  }
 
   /** The board most people start with */
   def canonicalBoard():	BoardList = List(mkBoards(5).tail.tail.tail.tail.head)
 
   def main(args : Array[String]) {
-//    println(solveBoards(mkBoards(5))) 
-    dumpMoves((solveBoards(canonicalBoard())))
+    // println(solveBoards(mkBoards(5))) 
+    // for(ms <- (solveBoards(canonicalBoard(), Nil))) dumpMoves(ms)
+    println("Broken and unfinished.  Check back soon.")
   }
 
   // Pretty print a list
