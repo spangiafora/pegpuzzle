@@ -131,5 +131,23 @@ class PegPuzzleSuite extends FunSuite {
       assert(res9 == Location(5, 2))
     }
   }
+
+  test("Apply move") {
+    val board1 = List(List(e),
+		    List(p, p),
+		  List(p, p, p),
+		List(p, p, p, p),
+	      List(p, p, p, p, p));
+
+    val board2 = List(List(p),
+		    List(e, p),
+		  List(e, p, p),
+		List(p, p, p, p),
+	      List(p, p, p, p, p));
+
+    val move = Move(Location(3, 1), Location(1, 1))
+
+    assert(applyMove(board1, move) == board2)
+  }
 }
 

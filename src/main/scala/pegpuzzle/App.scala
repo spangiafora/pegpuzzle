@@ -296,7 +296,7 @@ object App {
    * </ul>
    */ 
   def applyMove(board: Board, move: Move): Board = {
-
+    println("Applying move: " + move)
     // calculate the new value for a board position
     def slotVal(rowNum: Int, colNum: Int): SlotVal = {
       val loc = Location(rowNum, colNum)
@@ -319,54 +319,59 @@ object App {
   }
 
   /**
+   * Apply a list of moves to a board, yielding a list of boards
+   */
+  def applyMoves(board: Board, moves: List[Move]): BoardList = 
+    moves.map(applyMove(board, _:Move))
+
+  /**
    * Find all solutions to the puzzle represented by "board"
    */ 
-  def solveBoard(accu: List[Move])(board: Board): List[List[Move]] = {
-    Nil  // FixMe: stubbed so it will build and the tests can run
-/*
+  def solveBoard(board: Board, accu: List[Move]): List[List[Move]] = {
+
     def solve(board: Board, accu: List[Move]): List[List[Move]] = {
       val moves = findAllMoves(board)
 
       if (moves isEmpty) {
-	if (pegsOnBoard(board) == 1) {
-          accu
+        if (pegsOnBoard(board) == 1) { 
+          dumpBoard(board)
+          dumpMoves(accu)
+          List(accu)
         }
-	else {
-          Nil.toSet
-        }
+        else Nil
       }
       else {
-        val boards = for {
-                       m <- moves;
-                       b = applyMove(board, m)
-                     } yield b
-        solveBoards(boards, m :: accu)
+        val boards = applyMoves(board, moves)
+        solveBoardList(boards, accu)
       } 
     }
-    solve(board, Nil)
- */
+
+    val solution = solve(board, Nil)
+    solution
   }
 
-  def solveBoards(boards: BoardList, accu: List[Move]): List[List[Move]] = {
-    Nil // FixMe
-    // boards.map(solveBoard(accu))
-  }
+  def solveBoardList(boards: BoardList, accu: List[Move]): List[List[Move]] =
+    boards.map(solveBoard(_:Board, accu)).flatten
+
+  def solveBoards(boards: BoardList): List[List[Move]] = 
+    solveBoardList(boards, Nil)
 
   /** The board most people start with */
-  def canonicalBoard():	BoardList = List(mkBoards(5).tail.tail.tail.tail.head)
+  def canonicalBoard(): BoardList = List(mkBoards(5).tail.tail.tail.tail.head)
 
   def main(args : Array[String]) {
     // println(solveBoards(mkBoards(5))) 
-    // for(ms <- (solveBoards(canonicalBoard(), Nil))) dumpMoves(ms)
-    println("Broken and unfinished.  Check back soon.")
+    for(ms <- (solveBoards(canonicalBoard()))) dumpMoves(ms)
   }
 
   // Pretty print a list
-  def dumpMoves(l: List[Move]): Unit =
+  def dumpMoves(l: List[Move]): Unit = {
+    println("MoveList")
     for(m <- l) println(m)
+  }
 
   // Pretty print a board
-  def dumpboard(board: Board): Unit = {
+  def dumpBoard(board: Board): Unit = {
     def db(b: Board, i: Int): Unit = {
       if (b isEmpty) return
       else {
@@ -420,5 +425,8 @@ object App {
  * 15) Consider converting the lists to arrays for direct element access
  * 16) I need to understand the conversions that happen behind the scenes
  *     requiring me, for example, to invoke tolist in mkAllBoards
+ * 17) I am currently thinking of a solution as a list of list of moves.
+ *     It might make more sense to build a tree of moves so that shared
+ *     paths would be explicitly shared.
  */
 
