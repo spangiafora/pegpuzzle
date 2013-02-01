@@ -47,6 +47,8 @@ object App {
   type Row = List[SlotVal]
   type Board = List[Row]
   type BoardList = List[Board]
+  type Path = List[Move]
+  type SolutionSet = List[Path]
 
   /*
    * Turn board counter clockwise until left edge becomes bottom edge.
@@ -273,7 +275,7 @@ object App {
    *  <li>have an occupied slot between them and the location
    * </ul>
    */    
-  def findMoves(board: Board)(loc: Location): List[Move] = {
+  def findMoves(board: Board)(loc: Location): Path = {
     def locToMove(l: Location): Move =  Move(loc, l)
     getTargetLocations(board, loc).map(locToMove)
   }
@@ -281,7 +283,7 @@ object App {
   /**
    * Find all moves from all starting positions on a board
    */
-  def findAllMoves(board: Board): List[Move] = {
+  def findAllMoves(board: Board): Path = {
     val locs = getAllBoardLocations(board.size)
     locs.flatMap(findMoves(board))
   }
@@ -321,15 +323,15 @@ object App {
   /**
    * Apply a list of moves to a board, yielding a list of boards
    */
-  def applyMoves(board: Board, moves: List[Move]): BoardList = 
+  def applyMoves(board: Board, moves: Path): BoardList = 
     moves.map(applyMove(board, _:Move))
 
   /**
    * Find all solutions to the puzzle represented by "board"
    */ 
-  def solveBoard(board: Board, accu: List[Move]): List[List[Move]] = {
+  def solveBoard(board: Board, accu: Path): SolutionSet = {
 
-    def solve(board: Board, accu: List[Move]): List[List[Move]] = {
+    def solve(board: Board, accu: Path): SolutionSet = {
       val moves = findAllMoves(board)
 
       if (moves isEmpty) {
@@ -350,13 +352,23 @@ object App {
     solution
   }
 
-  def solveBoardList(boards: BoardList, accu: List[Move]): List[List[Move]] =
+  def solveBoardList(boards: BoardList, accu: Path): SolutionSet =
     boards.map(solveBoard(_:Board, accu)).flatten
 
-  def solveBoards(boards: BoardList): List[List[Move]] = 
+  def solveBoards(boards: BoardList): SolutionSet = 
     solveBoardList(boards, Nil)
 
-  /** The board most people start with */
+  /** The board most people start with
+   * <pre>
+   *  <code>
+   *         e
+   *        p p
+   *       p p p
+   *      p p p p
+   *     p p p p p
+   *  </code>
+   * </pre>
+   */
   def canonicalBoard(): BoardList = List(mkBoards(5).tail.tail.tail.tail.head)
 
   def main(args : Array[String]) {
@@ -365,7 +377,7 @@ object App {
   }
 
   // Pretty print a list
-  def dumpMoves(l: List[Move]): Unit = {
+  def dumpMoves(l: Path): Unit = {
     println("MoveList")
     for(m <- l) println(m)
   }
