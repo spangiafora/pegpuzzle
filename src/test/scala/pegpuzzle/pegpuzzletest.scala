@@ -10,28 +10,28 @@ class PegPuzzleSuite extends FunSuite {
   import SlotVal._
 
   trait TestData {
-    val board = canonicalBoard().head
+    val board = canonicalBoard()
 
-    val a = Location(1, 1)
-    val b = Location(2, 1)
-    val c = Location(2, 2)
-    val d = Location(3, 1)
-    val e = Location(3, 2)
-    val f = Location(3, 3)
-    val g = Location(4, 1)
-    val h = Location(4, 2)
-    val i = Location(4, 3)
-    val j = Location(4, 4)
-    val k = Location(5, 1)
-    val l = Location(5, 2)
-    val n = Location(5, 3)
-    val o = Location(5, 4)
-    val p = Location(5, 5)
+    val a = (1, 1)
+    val b = (2, 1)
+    val c = (2, 2)
+    val d = (3, 1)
+    val e = (3, 2)
+    val f = (3, 3)
+    val g = (4, 1)
+    val h = (4, 2)
+    val i = (4, 3)
+    val j = (4, 4)
+    val k = (5, 1)
+    val l = (5, 2)
+    val n = (5, 3)
+    val o = (5, 4)
+    val p = (5, 5)
 
-    val bad1 = Location(5, 6)
-    val bad2 = Location(6, 5)
-    val bad3 = Location(0, 1)
-    val bad4 = Location(1, 2)
+    val bad1 = (5, 6)
+    val bad2 = (6, 5)
+    val bad3 = (0, 1)
+    val bad4 = (1, 2)
   }
 
   test("Occupied") {
@@ -118,17 +118,17 @@ class PegPuzzleSuite extends FunSuite {
       // case I had a problem with
       val res9 = between(n, k)
 
-      assert(res1 == Location(2, 2))
-      assert(res2 == Location(2, 1))
-      assert(res3 == Location(4, 2))
-      assert(res4 == Location(4, 3))
+      assert(res1 == (2, 2))
+      assert(res2 == (2, 1))
+      assert(res3 == (4, 2))
+      assert(res4 == (4, 3))
 
-      assert(res5 == Location(2, 2))
-      assert(res6 == Location(2, 1))
-      assert(res7 == Location(4, 2))
-      assert(res8 == Location(4, 3))
+      assert(res5 == (2, 2))
+      assert(res6 == (2, 1))
+      assert(res7 == (4, 2))
+      assert(res8 == (4, 3))
 
-      assert(res9 == Location(5, 2))
+      assert(res9 == (5, 2))
     }
   }
 
@@ -137,17 +137,34 @@ class PegPuzzleSuite extends FunSuite {
 		    List(p, p),
 		  List(p, p, p),
 		List(p, p, p, p),
-	      List(p, p, p, p, p));
+	      List(p, p, p, p, p))
 
     val board2 = List(List(p),
 		    List(e, p),
 		  List(e, p, p),
 		List(p, p, p, p),
-	      List(p, p, p, p, p));
+	      List(p, p, p, p, p))
 
-    val move = Move(Location(3, 1), Location(1, 1))
+   val goodmove = ((3, 1), (1, 1))
 
-    assert(applyMove(board1, move) == board2)
+/*
+    val board3 = List(List(e), 
+                    List(e, e), 
+                   List(p, e, p), 
+                  List(p, p, p, p), 
+                 List(p, p, p, p, p))
+
+    val board4 = List(List(e), 
+                    List(e, e), 
+                   List(p, e, p), 
+                  List(p, p, p, e), 
+                 List(p, p, p, p, e))
+ 
+   val badmove  = ((5, 5), (3, 3))
+*/
+
+    assert(applyMove(board1, goodmove) == board2)
+//    assert(applyMove(board1, badmove) != board4)
   }
 }
 

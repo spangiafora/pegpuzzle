@@ -341,21 +341,29 @@ object App {
   /**
    * Find all solutions to the puzzle represented by "board"
    */ 
-  def solveBoard(board: BoardMove): Option[SolutionSet] = {
+  def solveBoard(board: BoardMove, accu: Path): Option[SolutionSet] = {
     val moves = findAllMoves(boardRows(board))
 
     if (moves isEmpty) {
-      if (pegsOnBoard(boardRows(board)) == 1) Some(List(List(lastMove(board))))
+      if (pegsOnBoard(boardRows(board)) == 1) { 
+
+        dumpBoardMove(board)
+        dumpMoves(accu)
+
+        Some(List(accu))
+      }
       else None
     }
     else {
       val boards = applyMoves(boardRows(board), moves)
-      Some(solveBoard(boards.head).getOrElse(Nil) ::: solveBoardList(boards.tail))
+
+      Some(solveBoard(boards.head, lastMove(board) :: accu).getOrElse(Nil) 
+         ++ solveBoardList(boards.tail, accu))
     } 
   }
 
-  def solveBoardList(boardMoves: BoardMoveList): SolutionSet = {
-    boardMoves.map(solveBoard).flatten.flatten
+  def solveBoardList(boardMoves: BoardMoveList, accu: Path): SolutionSet = {
+    boardMoves.map(solveBoard(_:BoardMove, accu)).flatten.flatten
   }
 
   /** The board most people start with
@@ -369,12 +377,74 @@ object App {
    *  </code>
    * </pre>
    */
-  def canonicalBoard(): BoardMoveList = List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
+  def canonicalBoard(): Board = mkBoards(5).tail.tail.tail.tail.head
+  def canonicalBoardMove(): BoardMoveList = List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
 
   def main(args : Array[String]) {
     // println(solveBoards(mkBoardList(5))) 
-    for (b <- canonicalBoard()) dumpBoard(boardRows(b))
-    for(ms <- (solveBoardList(canonicalBoard()))) dumpMoves(ms)
+    // for (b <- canonicalBoard()) dumpBoard(boardRows(b))
+    // for(path <- (solveBoardList(canonicalBoard(), Nil))) dumpMoves(path.reverse)
+    // solveBoardList(canonicalBoard(), Nil)
+    var x = (mkBoards(5).tail.tail.tail.tail.head, dummyMove)
+
+    dumpBoardMove(x)
+
+    x = applyMove(boardRows(x), ((3,1),(1,1)))
+    dumpBoardMove(x)
+    println(x)
+
+    x = applyMove(boardRows(x), ((3,3),(3,1)))
+    dumpBoardMove(x)
+    println(x)
+
+    x = applyMove(boardRows(x), ((1,1),(3,3)))
+    dumpBoardMove(x)
+    println(x)
+
+    x = applyMove(boardRows(x), ((5,5),(3,3)))
+    dumpBoardMove(x)
+    println(x)
+
+    x = applyMove(boardRows(x), ((2,1),(4,3)))
+    dumpBoardMove(x)
+    println(x)
+
+    x = applyMove(boardRows(x), ((5,4),(5,2)))
+    dumpBoardMove(x)
+    println(x)
+
+    x = applyMove(boardRows(x), ((5,1),(5,3)))
+    dumpBoardMove(x)
+    println(x)
+
+/**
+ * This sequence seems to be happening, and it should not be legal.
+ * Next step is to check the unit tests.
+ * 
+ *      ((3,3),(3,1))
+ *                p 
+ *               e p 
+ *              p e e 
+ *             p p p p 
+ *            p p p p p 
+ * 
+ *      Board and Move
+ *      ((1,1),(3,3))
+ *                e 
+ *               e e 
+ *              p e p 
+ *             p p p p 
+ *            p p p p p 
+ * 
+ *      Board and Move
+ *      ((5,5),(3,3))
+ *                e 
+ *               e e 
+ *              p e p 
+ *             p p p e 
+ *            p p p p e 
+ */
+
   }
 
   // Pretty print a list
