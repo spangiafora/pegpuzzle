@@ -25,13 +25,16 @@ object App {
   // I use the terms Location and Slot more or less interchangeably.  Typically
   // I use Slot when I am interested in the contents, and Location when I am
   // interested in the position on the board.
-  case class Location(r: Int, c: Int) {
-    override def toString = "(Row: " + r + ", Col: " + c + ")"
-  }
 
-  case class Move(source: Location, target: Location) {
-    override def toString = "From: " + source + " To: " + target
-  }
+  type Location = (Int, Int)
+
+  def row(l: Location) = l._1
+  def column(l: Location) = l._2
+
+  type Move = (Location, Location)
+
+  def sourcePos(m: Move) = m._1
+  def targetPos(m: Move) = m._2
 
   object SlotVal extends Enumeration {
     type SlotVal = Value
@@ -44,14 +47,20 @@ object App {
   // it would be more efficient to store them as arrays.
   // For now I am going to stick with lists until I have 
   // the solution working.
-  type Row = List[SlotVal]
-  type Board = List[Row]
-  type BoardList = List[Board]
-  type Path = List[Move]
-  type SolutionSet = List[Path]
+  type Row           = List[SlotVal]
+  type Board         = List[Row]
+  type BoardMove     = (List[Row], Move)
+  type BoardList     = List[Board]
+  type BoardMoveList = List[BoardMove]
+  type Path          = List[Move]
+  type SolutionSet   = List[Path]
 
+  def boardRows(b: BoardMove) = b._1
+  def lastMove(b: BoardMove) = b._2
+
+  def dummyMove = ((0,0),(0,0))
   /*
-   * Turn board counter clockwise until left edge becomes bottom edge.
+   * Turn board counter-clockwise until left edge becomes bottom edge.
    * All rotations of a board can be considered identical configurations.
    * 
    * <pre><code>
@@ -93,7 +102,7 @@ object App {
    * Get the content (peg or empty) at a board location
    */
   def getSlotContent(board: Board, loc: Location): SlotVal = {
-    board(loc.r - 1)(loc.c - 1)  
+    board(row(loc) - 1)(column(loc) - 1)  
   }
 
   /**
@@ -104,21 +113,24 @@ object App {
   }
 
   def between(move: Move): Location = {
-    between(move.source, move.target)
+    between(sourcePos(move), targetPos(move))
   }
 
   /**
-   * Assume abs(loc1.r - loc2.r) == 2 or zero
-   * and    abs(loc1.c - loc2.c) == 2 
+   * Assume abs(row(loc1) - row(loc2)) == 2 or zero
+   * and    abs(column(loc1) - column(loc2)) == 2 
    * (Does this need an assertion?)
    * 
    * Return the location of the slot between the two locations
    */
   def between(loc1: Location, loc2: Location): Location = {
-    val c = if (loc1.c == loc2.c) loc1.c else (loc1.c min loc2.c) + 1
-    val r = if (loc1.r == loc2.r) loc1.r else (loc1.r min loc2.r) + 1
+    val c = if (column(loc1) == column(loc2)) column(loc1) 
+            else (column(loc1) min column(loc2)) + 1
 
-    Location(r, c)
+    val r = if (row(loc1) == row(loc2)) row(loc1) 
+            else (row(loc1) min row(loc2)) + 1
+
+    (r, c)
   }
 
   /**
@@ -128,9 +140,9 @@ object App {
   def isValidLocation(board: Board, loc: Location): Boolean = {
     val l = 0             // lower limit
     val ru = board.size   // upper limit on row
-    val cu = loc.r        // upper limit on col
+    val cu = row(loc)     // upper limit on col
 
-    (loc.r > l) && (loc.r <= ru) && (loc.c > l) && (loc.c <= cu)
+    (row(loc) > l) && (row(loc) <= ru) && (column(loc) > l) && (column(loc) <= cu)
   }
 
   /*
@@ -143,7 +155,7 @@ object App {
     def addRowElements(rowNum: Int, colNum: Int) : Row = {
       if (colNum == rowNum + 1) Nil
       else {
-        val id = if (Location(rowNum, colNum) == emptyLoc) e else p
+        val id = if ((rowNum, colNum) == emptyLoc) e else p
         id :: addRowElements(rowNum, colNum + 1)
       }
     }
@@ -182,7 +194,7 @@ object App {
     val l = for {
       x <- 1 to edgesize;
       y <- 1 to x;
-      z = mkBoard(edgesize, Location(x, y))
+      z = mkBoard(edgesize, (x, y))
     } yield z
     l.toList
   }
@@ -192,7 +204,7 @@ object App {
     val l = for {
       x <- 1 to edgesize;
       y <- 1 to x;
-      z = Location(x, y)
+      z = (x, y)
     } yield z
     l.toList
   }
@@ -228,12 +240,12 @@ object App {
    * locations.
    */
   def genPotentialDestinations(loc: Location): List[Location] = {
-    List(Location(loc.r - 2, loc.c - 2),
-         Location(loc.r - 2, loc.c    ),
-         Location(loc.r,     loc.c - 2),
-         Location(loc.r,     loc.c + 2),
-         Location(loc.r + 2, loc.c    ),
-         Location(loc.r + 2, loc.c + 2))
+    List((row(loc) - 2, column(loc) - 2),
+         (row(loc) - 2, column(loc)    ),
+         (row(loc),     column(loc) - 2),
+         (row(loc),     column(loc) + 2),
+         (row(loc) + 2, column(loc)    ),
+         (row(loc) + 2, column(loc) + 2))
   }
 
   /**
@@ -276,7 +288,7 @@ object App {
    * </ul>
    */    
   def findMoves(board: Board)(loc: Location): Path = {
-    def locToMove(l: Location): Move =  Move(loc, l)
+    def locToMove(l: Location): Move =  (loc, l)
     getTargetLocations(board, loc).map(locToMove)
   }
 
@@ -297,14 +309,13 @@ object App {
    *   <li>Slot between them will be empty
    * </ul>
    */ 
-  def applyMove(board: Board, move: Move): Board = {
-    println("Applying move: " + move)
+  def applyMove(board: Board, move: Move): BoardMove = {
     // calculate the new value for a board position
     def slotVal(rowNum: Int, colNum: Int): SlotVal = {
-      val loc = Location(rowNum, colNum)
+      val loc = (rowNum, colNum)
 
-      if (loc == move.source) e 
-      else if (loc == move.target) p
+      if (loc == sourcePos(move)) e 
+      else if (loc == targetPos(move)) p
       else if (loc == between(move)) e
       else getSlotContent(board, loc)
     }
@@ -317,46 +328,49 @@ object App {
     def updateRow(row: Row): Row = upd(row, 1, Nil)
 
     // update each of the rows in a board
-    board.map(updateRow)
+    val b = board.map(updateRow)
+    (b, move)
   }
 
   /**
    * Apply a list of moves to a board, yielding a list of boards
    */
-  def applyMoves(board: Board, moves: Path): BoardList = 
+  def applyMoves(board: Board, moves: Path): BoardMoveList = 
     moves.map(applyMove(board, _:Move))
 
   /**
    * Find all solutions to the puzzle represented by "board"
    */ 
-  def solveBoard(board: Board, accu: Path): SolutionSet = {
+  def solveBoard(board: BoardMove): Option[SolutionSet] = {
 
-    def solve(board: Board, accu: Path): SolutionSet = {
-      val moves = findAllMoves(board)
+    def solve(board: BoardMove): Option[SolutionSet] = {
+      val moves = findAllMoves(boardRows(board))
+
+      println("OUTER")
+      dumpBoardMove(board)
 
       if (moves isEmpty) {
-        if (pegsOnBoard(board) == 1) { 
-          dumpBoard(board)
-          dumpMoves(accu)
-          List(accu)
-        }
-        else Nil
+        println("No more moves")
+        dumpBoard(boardRows(board))
+
+        if (pegsOnBoard(boardRows(board)) == 1) Some(List(List(lastMove(board))))
+        else None
       }
       else {
-        val boards = applyMoves(board, moves)
-        solveBoardList(boards, accu)
+        val boards = applyMoves(boardRows(board), moves)
+        println("In part two")
+        for(b <- boards) dumpBoardMove(b)
+        Some(solve(boards.head)getOrElse(Nil) ::: solveBoardList(boards.tail))
       } 
     }
-
-    val solution = solve(board, Nil)
-    solution
+    solve(board)
   }
 
-  def solveBoardList(boards: BoardList, accu: Path): SolutionSet =
-    boards.map(solveBoard(_:Board, accu)).flatten
-
-  def solveBoards(boards: BoardList): SolutionSet = 
-    solveBoardList(boards, Nil)
+  def solveBoardList(boardMoves: BoardMoveList): SolutionSet = {
+    println("In SBL")
+    for(b <- boardMoves) dumpBoard(boardRows(b))
+    boardMoves.map(solveBoard).flatten.flatten
+  }
 
   /** The board most people start with
    * <pre>
@@ -369,17 +383,19 @@ object App {
    *  </code>
    * </pre>
    */
-  def canonicalBoard(): BoardList = List(mkBoards(5).tail.tail.tail.tail.head)
+  def canonicalBoard(): BoardMoveList = List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
 
   def main(args : Array[String]) {
-    // println(solveBoards(mkBoards(5))) 
-    for(ms <- (solveBoards(canonicalBoard()))) dumpMoves(ms)
+    // println(solveBoards(mkBoardList(5))) 
+    for (b <- canonicalBoard()) dumpBoard(boardRows(b))
+    for(ms <- (solveBoardList(canonicalBoard()))) dumpMoves(ms)
   }
 
   // Pretty print a list
   def dumpMoves(l: Path): Unit = {
     println("MoveList")
     for(m <- l) println(m)
+    println("===== ===== =====")
   }
 
   // Pretty print a board
@@ -397,6 +413,13 @@ object App {
       }
     }
     db(board, board.size * 2)
+  }
+
+  // Pretty print a board and move
+  def dumpBoardMove(b: BoardMove): Unit = {
+    println("Board and Move")
+    println(lastMove(b))
+    dumpBoard(boardRows(b))
   }
 }
 
