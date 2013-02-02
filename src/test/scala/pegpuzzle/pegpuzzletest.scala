@@ -7,16 +7,42 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class PegPuzzleSuite extends FunSuite {
   import App._
-  import SlotVal._
+  import SlotVal.e
+  import SlotVal.p
 
   trait TestData {
     val board = canonicalBoard()
+
+    val board1 = List(List(e),
+                     List(p, p),
+                    List(p, p, p),
+                   List(p, p, p, p),
+                  List(p, p, p, p, p))
+
+    val board2 = List(List(p),
+                     List(e, p),
+                    List(e, p, p),
+                   List(p, p, p, p),
+                  List(p, p, p, p, p))
+
+
+    val board3 = List(List(e), 
+                    List(e, e), 
+                   List(p, e, p), 
+                  List(p, p, p, p), 
+                 List(p, p, p, p, p))
+
+    val board4 = List(List(e), 
+                    List(e, e), 
+                   List(p, e, p), 
+                  List(p, p, p, e), 
+                 List(p, p, p, p, e))
 
     val a = (1, 1)
     val b = (2, 1)
     val c = (2, 2)
     val d = (3, 1)
-    val e = (3, 2)
+    val e1 = (3, 2)
     val f = (3, 3)
     val g = (4, 1)
     val h = (4, 2)
@@ -26,12 +52,38 @@ class PegPuzzleSuite extends FunSuite {
     val l = (5, 2)
     val n = (5, 3)
     val o = (5, 4)
-    val p = (5, 5)
+    val p1 = (5, 5)
 
     val bad1 = (5, 6)
     val bad2 = (6, 5)
     val bad3 = (0, 1)
     val bad4 = (1, 2)
+  }
+
+  // I changed the struture of locations, moves, etc
+  // so this is just to confirm nothing was broken in the
+  // rearrangement of the code
+  test("References") {
+    val l1 = (1, 2)
+    val l2 = (2, 3)  
+    val l3 = (1, 1)  
+    val l4 = (3, 2)  
+
+    val m1 = (l1, l2)
+    val b1 = canonicalBoard()
+    val b2 = List(List(e), List(p, p), List(p, p, p), List(p, p, p, p), List(p, p, p, p, p))
+
+    assert(b1 == b2)
+    assert(row(l1) == 1)
+    assert(column(l1) == 2)
+    assert(row(l2) == 2)
+    assert(column(l2) == 3)
+    assert(sourcePos(m1) == l1)
+    assert(targetPos(m1) == l2)
+    assert(getSlotContent(b1, l3) == e)
+    assert(getSlotContent(b1, l4) == p)
+    assert(!(occupied(b1, l3)))
+    assert(occupied(b1, l4))
   }
 
   test("Occupied") {
@@ -40,7 +92,7 @@ class PegPuzzleSuite extends FunSuite {
       assert(occupied(board, b))
       assert(occupied(board, c))
       assert(occupied(board, d))
-      assert(occupied(board, e))
+      assert(occupied(board, e1))
       assert(occupied(board, f))
       assert(occupied(board, g))
       assert(occupied(board, h))
@@ -50,7 +102,7 @@ class PegPuzzleSuite extends FunSuite {
       assert(occupied(board, l))
       assert(occupied(board, n))
       assert(occupied(board, o))
-      assert(occupied(board, p))
+      assert(occupied(board, p1))
     }
   }
 
@@ -60,7 +112,7 @@ class PegPuzzleSuite extends FunSuite {
       assert(isValidLocation(board, b))
       assert(isValidLocation(board, c))
       assert(isValidLocation(board, d))
-      assert(isValidLocation(board, e))
+      assert(isValidLocation(board, e1))
       assert(isValidLocation(board, f))
       assert(isValidLocation(board, g))
       assert(isValidLocation(board, h))
@@ -70,7 +122,7 @@ class PegPuzzleSuite extends FunSuite {
       assert(isValidLocation(board, l))
       assert(isValidLocation(board, n))
       assert(isValidLocation(board, o))
-      assert(isValidLocation(board, p))
+      assert(isValidLocation(board, p1))
 
       assert(!(isValidLocation(board, bad1)))
       assert(!(isValidLocation(board, bad2)))
@@ -106,14 +158,14 @@ class PegPuzzleSuite extends FunSuite {
     new TestData {
       val res1 = between(f, a)
       val res2 = between(d, a)
-      val res3 = between(e, l)
-      val res4 = between(e, n)
+      val res3 = between(e1, l)
+      val res4 = between(e1, n)
 
       // reverse arg order
       val res5 = between(a, f)
       val res6 = between(a, d)
-      val res7 = between(l, e)
-      val res8 = between(n, e)
+      val res7 = between(l, e1)
+      val res8 = between(n, e1)
 
       // case I had a problem with
       val res9 = between(n, k)
@@ -132,39 +184,21 @@ class PegPuzzleSuite extends FunSuite {
     }
   }
 
+  test("Potential moves") {
+    new TestData {
+      assert(genPotentialDestinations((5, 5)).contains((3, 3)))
+      assert(! getTargetLocations(board2, (5, 5)).contains((3, 3)))
+    }
+  }
+
   test("Apply move") {
-    val board1 = List(List(e),
-		    List(p, p),
-		  List(p, p, p),
-		List(p, p, p, p),
-	      List(p, p, p, p, p))
+    new TestData {
+      val goodmove = ((3, 1), (1, 1))
+      val badmove  = ((5, 5), (3, 3))
 
-    val board2 = List(List(p),
-		    List(e, p),
-		  List(e, p, p),
-		List(p, p, p, p),
-	      List(p, p, p, p, p))
-
-   val goodmove = ((3, 1), (1, 1))
-
-/*
-    val board3 = List(List(e), 
-                    List(e, e), 
-                   List(p, e, p), 
-                  List(p, p, p, p), 
-                 List(p, p, p, p, p))
-
-    val board4 = List(List(e), 
-                    List(e, e), 
-                   List(p, e, p), 
-                  List(p, p, p, e), 
-                 List(p, p, p, p, e))
- 
-   val badmove  = ((5, 5), (3, 3))
-*/
-
-    assert(applyMove(board1, goodmove) == board2)
-//    assert(applyMove(board1, badmove) != board4)
+      assert(boardRows(applyMove(board1, goodmove)) == board2)
+      assert(boardRows(applyMove(board1, badmove)) != board4)
+    }
   }
 }
 
