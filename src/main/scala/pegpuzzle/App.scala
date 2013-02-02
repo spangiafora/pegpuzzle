@@ -342,33 +342,19 @@ object App {
    * Find all solutions to the puzzle represented by "board"
    */ 
   def solveBoard(board: BoardMove): Option[SolutionSet] = {
+    val moves = findAllMoves(boardRows(board))
 
-    def solve(board: BoardMove): Option[SolutionSet] = {
-      val moves = findAllMoves(boardRows(board))
-
-      println("OUTER")
-      dumpBoardMove(board)
-
-      if (moves isEmpty) {
-        println("No more moves")
-        dumpBoard(boardRows(board))
-
-        if (pegsOnBoard(boardRows(board)) == 1) Some(List(List(lastMove(board))))
-        else None
-      }
-      else {
-        val boards = applyMoves(boardRows(board), moves)
-        println("In part two")
-        for(b <- boards) dumpBoardMove(b)
-        Some(solve(boards.head)getOrElse(Nil) ::: solveBoardList(boards.tail))
-      } 
+    if (moves isEmpty) {
+      if (pegsOnBoard(boardRows(board)) == 1) Some(List(List(lastMove(board))))
+      else None
     }
-    solve(board)
+    else {
+      val boards = applyMoves(boardRows(board), moves)
+      Some(solveBoard(boards.head).getOrElse(Nil) ::: solveBoardList(boards.tail))
+    } 
   }
 
   def solveBoardList(boardMoves: BoardMoveList): SolutionSet = {
-    println("In SBL")
-    for(b <- boardMoves) dumpBoard(boardRows(b))
     boardMoves.map(solveBoard).flatten.flatten
   }
 
