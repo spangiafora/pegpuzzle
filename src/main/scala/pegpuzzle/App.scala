@@ -345,20 +345,14 @@ object App {
     val moves = findAllMoves(boardRows(board))
 
     if (moves isEmpty) {
-      if (pegsOnBoard(boardRows(board)) == 1) { 
-
-        dumpBoardMove(board)
-        dumpMoves(accu)
-
-        Some(List(accu))
-      }
+      if (pegsOnBoard(boardRows(board)) == 1) Some(List(accu))
       else None
     }
     else {
       val boards = applyMoves(boardRows(board), moves)
 
       Some(solveBoard(boards.head, lastMove(board) :: accu).getOrElse(Nil) 
-         ++ solveBoardList(boards.tail, accu))
+         ++ solveBoardList(boards.tail, lastMove(board) :: accu))
     } 
   }
 
@@ -369,6 +363,9 @@ object App {
   /** The board most people start with
    * <pre>
    *  <code>
+   *  List(List(e), List(p, p), List(p, p, p), List(p, p, p, p), List(p, p, p, p, p))
+   * 
+   *  or:
    *         e
    *        p p
    *       p p p
@@ -378,73 +375,45 @@ object App {
    * </pre>
    */
   def canonicalBoard(): Board = mkBoards(5).tail.tail.tail.tail.head
+
+  /** Canonical board plus dummy starting move */
   def canonicalBoardMove(): BoardMoveList = List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
 
   def main(args : Array[String]) {
     // println(solveBoards(mkBoardList(5))) 
     // for (b <- canonicalBoard()) dumpBoard(boardRows(b))
-    // for(path <- (solveBoardList(canonicalBoard(), Nil))) dumpMoves(path.reverse)
+    // for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
     // solveBoardList(canonicalBoard(), Nil)
     var x = (mkBoards(5).tail.tail.tail.tail.head, dummyMove)
 
+/*
     dumpBoardMove(x)
 
-    x = applyMove(boardRows(x), ((3,1),(1,1)))
+    x = applyMove(boardRows(x), ((3,3),(1,1)))
     dumpBoardMove(x)
-    println(x)
 
-    x = applyMove(boardRows(x), ((3,3),(3,1)))
+    println("===== ===== =====")
+// The problem is here.  Why does applying this move produce a board? The move
+// should not be legal in this configuration
+// unless applyMove does no checking.
+// In which case, where are we not checking when we should be?
+// It is findAllMoves job to produce a collection of valid moves.  Are we applying
+// moves from one location to another location unintentionally?  Doesn't
+// make sense - moves contain to and from locs, and are being applied to one board.
     dumpBoardMove(x)
-    println(x)
-
-    x = applyMove(boardRows(x), ((1,1),(3,3)))
-    dumpBoardMove(x)
-    println(x)
-
     x = applyMove(boardRows(x), ((5,5),(3,3)))
     dumpBoardMove(x)
-    println(x)
+    println("+++++ +++++ +++++")
 
     x = applyMove(boardRows(x), ((2,1),(4,3)))
     dumpBoardMove(x)
-    println(x)
 
     x = applyMove(boardRows(x), ((5,4),(5,2)))
     dumpBoardMove(x)
-    println(x)
 
     x = applyMove(boardRows(x), ((5,1),(5,3)))
     dumpBoardMove(x)
-    println(x)
-
-/**
- * This sequence seems to be happening, and it should not be legal.
- * Next step is to check the unit tests.
- * 
- *      ((3,3),(3,1))
- *                p 
- *               e p 
- *              p e e 
- *             p p p p 
- *            p p p p p 
- * 
- *      Board and Move
- *      ((1,1),(3,3))
- *                e 
- *               e e 
- *              p e p 
- *             p p p p 
- *            p p p p p 
- * 
- *      Board and Move
- *      ((5,5),(3,3))
- *                e 
- *               e e 
- *              p e p 
- *             p p p e 
- *            p p p p e 
- */
-
+*/
   }
 
   // Pretty print a list
