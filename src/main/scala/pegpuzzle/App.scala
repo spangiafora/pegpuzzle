@@ -343,9 +343,10 @@ object App {
    */ 
   def solveBoard(board: BoardMove, accu: Path): Option[SolutionSet] = {
     val moves = findAllMoves(boardRows(board))
-
     if (moves isEmpty) {
-      if (pegsOnBoard(boardRows(board)) == 1) Some(List(accu))
+      if (pegsOnBoard(boardRows(board)) == 1) {
+        Some(List(lastMove(board) :: accu)) 
+      }
       else None
     }
     else {
@@ -357,6 +358,9 @@ object App {
   }
 
   def solveBoardList(boardMoves: BoardMoveList, accu: Path): SolutionSet = {
+    // first flatten removes the Options
+    // second flatten reduces the list of solution sets 
+    // to a single solution set
     boardMoves.map(solveBoard(_:BoardMove, accu)).flatten.flatten
   }
 
@@ -380,47 +384,43 @@ object App {
   def canonicalBoardMove(): BoardMoveList = List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
 
   def main(args : Array[String]) {
+
+    // get all solutions for the board with five slots on an edge
     // println(solveBoards(mkBoardList(5))) 
-    // for (b <- canonicalBoard()) dumpBoard(boardRows(b))
-    // for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
+
     // solveBoardList(canonicalBoard(), Nil)
-    var x = (mkBoards(5).tail.tail.tail.tail.head, dummyMove)
 
-/*
-    dumpBoardMove(x)
+    // two partially completed boards for debugging
+    // val x = List((List(List(p), 
+    //                   List(p, e), 
+    //                  List(e, p, e), 
+    //                 List(p, e, e, p), 
+    //                List(p, e, e, p, e)),  ((0,0),(0,0))))
 
-    x = applyMove(boardRows(x), ((3,3),(1,1)))
-    dumpBoardMove(x)
+    // val x = List((List(List(e), 
+    //                   List(e, e), 
+    //                  List(e, p, e), 
+    //                 List(p, e, e, p), 
+    //                List(p, e, e, p, e)),  ((0,0),(0,0))))
 
-    println("===== ===== =====")
-// The problem is here.  Why does applying this move produce a board? The move
-// should not be legal in this configuration
-// unless applyMove does no checking.
-// In which case, where are we not checking when we should be?
-// It is findAllMoves job to produce a collection of valid moves.  Are we applying
-// moves from one location to another location unintentionally?  Doesn't
-// make sense - moves contain to and from locs, and are being applied to one board.
-    dumpBoardMove(x)
-    x = applyMove(boardRows(x), ((5,5),(3,3)))
-    dumpBoardMove(x)
-    println("+++++ +++++ +++++")
+    val x = canonicalBoardMove()
 
-    x = applyMove(boardRows(x), ((2,1),(4,3)))
-    dumpBoardMove(x)
+    // pretty print the starting board
+    // dumpBoard(boardRows(x head))
 
-    x = applyMove(boardRows(x), ((5,4),(5,2)))
-    dumpBoardMove(x)
+    val y = solveBoardList(x, Nil)
+    println(y.size)
 
-    x = applyMove(boardRows(x), ((5,1),(5,3)))
-    dumpBoardMove(x)
-*/
+    // for(path <- (solveBoardList(x, Nil))) println(path.reverse)
+    // for(path <- (solveBoardList(x, Nil))) dumpMoves(path.reverse)
+    // for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
+
   }
 
   // Pretty print a list
   def dumpMoves(l: Path): Unit = {
-    println("MoveList")
+    println(">>>")
     for(m <- l) println(m)
-    println("===== ===== =====")
   }
 
   // Pretty print a board
@@ -442,7 +442,6 @@ object App {
 
   // Pretty print a board and move
   def dumpBoardMove(b: BoardMove): Unit = {
-    println("Board and Move")
     println(lastMove(b))
     dumpBoard(boardRows(b))
   }
