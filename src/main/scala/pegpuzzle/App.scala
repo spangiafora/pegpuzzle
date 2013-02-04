@@ -343,10 +343,13 @@ object App {
    */ 
   def solveBoard(board: BoardMove, accu: Path): Option[SolutionSet] = {
     val moves = findAllMoves(boardRows(board))
+
+    //dumpBoardMove(board)
+    //println("Moves: " + moves)
+    //println("Path: " + accu)
+
     if (moves isEmpty) {
-      if (pegsOnBoard(boardRows(board)) == 1) {
-        Some(List(lastMove(board) :: accu)) 
-      }
+      if (pegsOnBoard(boardRows(board)) == 1) Some(List(lastMove(board) :: accu)) 
       else None
     }
     else {
@@ -386,47 +389,41 @@ object App {
   def main(args : Array[String]) {
     // get all solutions for the board with five slots on an edge
     // println(solveBoards(mkBoardList(5))) 
-
     // pretty print the starting board
-    dumpBoard(canonicalBoard())
-
-    for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
+    // dumpBoard(canonicalBoard())
+    // for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
+    test()
   }
 
-  // Messy alternative to main to be used as a playground
-  def fakeMain(args : Array[String]) {
+  def test() = {
+    // I believe this board has one failure path: (3,3) -> (1,1)
+    // and at least three success paths:
+    // 
+    //    (3,3) -> (5,5)
+    //    (5,5) -> (5,3)
+    //    (5,3) -> (3,3)
+    //    (3,3) -> (1,1)
+    // and
+    //    (3,3) -> (5,3)
+    //    (5,3) -> (5,5)
+    //    (5,5) -> (3,3)
+    //    (3,3) -> (1,1) 
+    // and
+    //    (3,3) -> (5,3)
+    //    (5,3) -> (5,5)
+    //    (5,5) -> (3,3)
+    //    (2,2) -> (4,4) 
 
-    // get all solutions for the board with five slots on an edge
-    // println(solveBoards(mkBoardList(5))) 
-
-    // solveBoardList(canonicalBoard(), Nil)
-
-    // two partially completed boards for debugging
-    val x = List((List(List(p), 
-                      List(p, e), 
-                     List(e, p, e), 
-                    List(p, e, e, p), 
-                   List(p, e, e, p, e)),  ((0,0),(0,0))))
-
-    // val x = List((List(List(e), 
-    //                   List(e, e), 
-    //                  List(e, p, e), 
-    //                 List(p, e, e, p), 
-    //                List(p, e, e, p, e)),  ((0,0),(0,0))))
-
-    // val x = canonicalBoardMove()
-
-    // pretty print the starting board
-    dumpBoard(boardRows(x head))
+    val x = List((List(List(e), 
+                      List(e, p), 
+                     List(e, e, p), 
+                    List(e, e, p, p), 
+                   List(e, e, e, p, e)),  ((0,0),(0,0))))
 
     val y = solveBoardList(x, Nil)
-    // for(p <- y) dumpMoves(p.reverse)
-
-    for(p <- y) { println("xxxxx xxxxx xxxxx"); printProgress((boardRows(x head)), p.reverse) }
-
-    // for(path <- (solveBoardList(x, Nil))) println(path.reverse)
-    // for(path <- (solveBoardList(x, Nil))) dumpMoves(path.reverse)
-    // for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
+//    for(p <- y) { println("xxxxx xxxxx xxxxx"); printProgress((boardRows(x head)), p.reverse) }
+    dumpBoard(boardRows(x.head))
+    for(p <- y) { println("xxxxx xxxxx xxxxx"); dumpMoves(p.reverse) }
   }
 
   def printProgress(b: Board, m: Path): Unit = {
@@ -465,6 +462,42 @@ object App {
     println(lastMove(b))
     dumpBoard(boardRows(b))
   }
+
+  def fakeMain(args : Array[String]) {
+
+    // get all solutions for the board with five slots on an edge
+    // println(solveBoards(mkBoardList(5))) 
+
+    // solveBoardList(canonicalBoard(), Nil)
+
+    // two partially completed boards for debugging
+    val x = List((List(List(p), 
+                      List(p, e), 
+                     List(e, p, e), 
+                    List(p, e, e, p), 
+                   List(p, e, e, p, e)),  ((0,0),(0,0))))
+
+    // val x = List((List(List(e), 
+    //                   List(e, e), 
+    //                  List(e, p, e), 
+    //                 List(p, e, e, p), 
+    //                List(p, e, e, p, e)),  ((0,0),(0,0))))
+
+    // val x = canonicalBoardMove()
+
+    // pretty print the starting board
+    dumpBoard(boardRows(x head))
+
+    val y = solveBoardList(x, Nil)
+    // for(p <- y) dumpMoves(p.reverse)
+
+    for(p <- y) { println("xxxxx xxxxx xxxxx"); printProgress((boardRows(x head)), p.reverse) }
+
+    // for(path <- (solveBoardList(x, Nil))) println(path.reverse)
+    // for(path <- (solveBoardList(x, Nil))) dumpMoves(path.reverse)
+    // for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
+  }
+
 }
 
 /*
