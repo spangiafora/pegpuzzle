@@ -384,6 +384,17 @@ object App {
   def canonicalBoardMove(): BoardMoveList = List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
 
   def main(args : Array[String]) {
+    // get all solutions for the board with five slots on an edge
+    // println(solveBoards(mkBoardList(5))) 
+
+    // pretty print the starting board
+    dumpBoard(canonicalBoard())
+
+    for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
+  }
+
+  // Messy alternative to main to be used as a playground
+  def fakeMain(args : Array[String]) {
 
     // get all solutions for the board with five slots on an edge
     // println(solveBoards(mkBoardList(5))) 
@@ -409,15 +420,13 @@ object App {
     dumpBoard(boardRows(x head))
 
     val y = solveBoardList(x, Nil)
-    val z = y.reverse
-//    for(p <- y) dumpMoves(p.reverse)
+    // for(p <- y) dumpMoves(p.reverse)
 
     for(p <- y) { println("xxxxx xxxxx xxxxx"); printProgress((boardRows(x head)), p.reverse) }
 
     // for(path <- (solveBoardList(x, Nil))) println(path.reverse)
     // for(path <- (solveBoardList(x, Nil))) dumpMoves(path.reverse)
     // for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
-
   }
 
   def printProgress(b: Board, m: Path): Unit = {
