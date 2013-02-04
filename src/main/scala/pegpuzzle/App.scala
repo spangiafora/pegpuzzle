@@ -391,11 +391,11 @@ object App {
     // solveBoardList(canonicalBoard(), Nil)
 
     // two partially completed boards for debugging
-    // val x = List((List(List(p), 
-    //                   List(p, e), 
-    //                  List(e, p, e), 
-    //                 List(p, e, e, p), 
-    //                List(p, e, e, p, e)),  ((0,0),(0,0))))
+    val x = List((List(List(p), 
+                      List(p, e), 
+                     List(e, p, e), 
+                    List(p, e, e, p), 
+                   List(p, e, e, p, e)),  ((0,0),(0,0))))
 
     // val x = List((List(List(e), 
     //                   List(e, e), 
@@ -403,18 +403,29 @@ object App {
     //                 List(p, e, e, p), 
     //                List(p, e, e, p, e)),  ((0,0),(0,0))))
 
-    val x = canonicalBoardMove()
+    // val x = canonicalBoardMove()
 
     // pretty print the starting board
-    // dumpBoard(boardRows(x head))
+    dumpBoard(boardRows(x head))
 
     val y = solveBoardList(x, Nil)
-    println(y.size)
+    val z = y.reverse
+//    for(p <- y) dumpMoves(p.reverse)
+
+    for(p <- y) { println("xxxxx xxxxx xxxxx"); printProgress((boardRows(x head)), p.reverse) }
 
     // for(path <- (solveBoardList(x, Nil))) println(path.reverse)
     // for(path <- (solveBoardList(x, Nil))) dumpMoves(path.reverse)
     // for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
 
+  }
+
+  def printProgress(b: Board, m: Path): Unit = {
+    if (! (m.isEmpty)) {
+      println(m head)
+      dumpBoard(b)
+      printProgress(boardRows(applyMove(b, m head)), m tail)
+    }
   }
 
   // Pretty print a list
