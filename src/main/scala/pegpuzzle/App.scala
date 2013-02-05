@@ -340,13 +340,10 @@ object App {
 
   /**
    * Find all solutions to the puzzle represented by "board"
+   * List of moves are added to accu. 
    */ 
   def solveBoard(board: BoardMove, accu: Path): Option[SolutionSet] = {
     val moves = findAllMoves(boardRows(board))
-
-    //dumpBoardMove(board)
-    //println("Moves: " + moves)
-    //println("Path: " + accu)
 
     if (moves isEmpty) {
       if (pegsOnBoard(boardRows(board)) == 1) Some(List(lastMove(board) :: accu)) 
@@ -360,10 +357,10 @@ object App {
     } 
   }
 
+  /** Solve a list of boards */
   def solveBoardList(boardMoves: BoardMoveList, accu: Path): SolutionSet = {
     // first flatten removes the Options
-    // second flatten reduces the list of solution sets 
-    // to a single solution set
+    // second flatten reduces list of solution sets to a single solution set
     boardMoves.map(solveBoard(_:BoardMove, accu)).flatten.flatten
   }
 
@@ -386,46 +383,30 @@ object App {
   /** Canonical board plus dummy starting move */
   def canonicalBoardMove(): BoardMoveList = List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
 
+  /**
+   * Seed the process by adding a dummy start move to each board.  This could
+   *  be done better.
+   */
+  def addDummyMoveToBoards(boardList: BoardList): BoardMoveList = {
+    val l = for {
+      b <- boardList;
+      m = (b, dummyMove)
+    } yield m
+
+    l.toList
+  }
+
+  /** Solve board from all starting positions */
   def main(args : Array[String]) {
-    // get all solutions for the board with five slots on an edge
-    // println(solveBoards(mkBoardList(5))) 
-    // pretty print the starting board
-    // dumpBoard(canonicalBoard())
-    // for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
-    test()
+    var boardList = mkBoards(5)
+    var boardMoves = addDummyMoveToBoards(boardList)
+    for(path <- (solveBoardList(boardMoves, Nil))) println(path.reverse) 
   }
 
-  def test() = {
-    // I believe this board has one failure path: (3,3) -> (1,1)
-    // and at least three success paths:
-    // 
-    //    (3,3) -> (5,5)
-    //    (5,5) -> (5,3)
-    //    (5,3) -> (3,3)
-    //    (3,3) -> (1,1)
-    // and
-    //    (3,3) -> (5,3)
-    //    (5,3) -> (5,5)
-    //    (5,5) -> (3,3)
-    //    (3,3) -> (1,1) 
-    // and
-    //    (3,3) -> (5,3)
-    //    (5,3) -> (5,5)
-    //    (5,5) -> (3,3)
-    //    (2,2) -> (4,4) 
-
-    val x = List((List(List(e), 
-                      List(e, p), 
-                     List(e, e, p), 
-                    List(e, e, p, p), 
-                   List(e, e, e, p, e)),  ((0,0),(0,0))))
-
-    val y = solveBoardList(x, Nil)
-//    for(p <- y) { println("xxxxx xxxxx xxxxx"); printProgress((boardRows(x head)), p.reverse) }
-    dumpBoard(boardRows(x.head))
-    for(p <- y) { println("xxxxx xxxxx xxxxx"); dumpMoves(p.reverse) }
-  }
-
+  /**
+   * Debugging routine to display a set of moves and resulting
+   * boards
+   */
   def printProgress(b: Board, m: Path): Unit = {
     if (! (m.isEmpty)) {
       println(m head)
@@ -434,11 +415,9 @@ object App {
     }
   }
 
-  // Pretty print a list
-  def dumpMoves(l: Path): Unit = {
-    println(">>>")
+  // Pretty print a list of moves
+  def dumpMoves(l: Path): Unit = 
     for(m <- l) println(m)
-  }
 
   // Pretty print a board
   def dumpBoard(board: Board): Unit = {
@@ -462,83 +441,16 @@ object App {
     println(lastMove(b))
     dumpBoard(boardRows(b))
   }
-
-  def fakeMain(args : Array[String]) {
-
-    // get all solutions for the board with five slots on an edge
-    // println(solveBoards(mkBoardList(5))) 
-
-    // solveBoardList(canonicalBoard(), Nil)
-
-    // two partially completed boards for debugging
-    val x = List((List(List(p), 
-                      List(p, e), 
-                     List(e, p, e), 
-                    List(p, e, e, p), 
-                   List(p, e, e, p, e)),  ((0,0),(0,0))))
-
-    // val x = List((List(List(e), 
-    //                   List(e, e), 
-    //                  List(e, p, e), 
-    //                 List(p, e, e, p), 
-    //                List(p, e, e, p, e)),  ((0,0),(0,0))))
-
-    // val x = canonicalBoardMove()
-
-    // pretty print the starting board
-    dumpBoard(boardRows(x head))
-
-    val y = solveBoardList(x, Nil)
-    // for(p <- y) dumpMoves(p.reverse)
-
-    for(p <- y) { println("xxxxx xxxxx xxxxx"); printProgress((boardRows(x head)), p.reverse) }
-
-    // for(path <- (solveBoardList(x, Nil))) println(path.reverse)
-    // for(path <- (solveBoardList(x, Nil))) dumpMoves(path.reverse)
-    // for(path <- (solveBoardList(canonicalBoardMove(), Nil))) dumpMoves(path.reverse)
-  }
-
 }
 
-/*
- *  things to try/do
- *  1) I am not sure rotational symmetry is enough.  I think reflective 
- *     symmetry could be an issue.  In other words do these have the same
- *     solution?  In a sense, no, since the exact set of moves can't be 
- *     applied.  But to a human being the steps are going to look awfully
- *     similar.
- *     
- *         p            p       
- *        e p          p e      
- *       p p p        p p p     
- *      p p p p      p p p p    
- *     p p p p p    p p p p p
- *     
- *  2) Can you do a rotation using only map and other list operations?
- *  3) Can you use fold or filter or a combination to eliminate duplicates 
- *     in mkAllBoards?
- *  4) Configure unit testing framework and write unit tests
- *  5) See if the routines that generate lists backwards can be rewritten
- *     to do them forwards from the start
- *  6) Apply more object oriented approaches to the types
- *  7) Translate to Clojure
- *  8) Translate to Java 8
- *  9) Translate to Java 7
- * 10) Translate to Smalltalk? (Bigger project.  I don't know Smalltalk at all.)
- * 11) See if you can come up with a reduction of a board configuration list
- *     to a single value that is the same for all three rotations of the 
- *     same board.
- * 12) Find out if dups can be filtered out before (or while) building
- *     all permutations 
- * 13) Does this puzzle become intractable as the board size grows?
- *     Consider caching results keyed by board. If a board has been solved
- *     any new solution will be the same.
- * 14) Convert this to parallel code.
- * 15) Consider converting the lists to arrays for direct element access
- * 16) I need to understand the conversions that happen behind the scenes
- *     requiring me, for example, to invoke tolist in mkAllBoards
- * 17) I am currently thinking of a solution as a list of list of moves.
- *     It might make more sense to build a tree of moves so that shared
- *     paths would be explicitly shared.
+/*  Things to try for the meetup
+ *  1) Get rid of the dummy start move
+ *  2) Translate to Clojure
+ *  3) Translate to Java 8
+ *  4) Translate to Java 7
+ *  5) Translate to Smalltalk? (Bigger project.  I don't know Smalltalk at all.)
+ *  6) Convert to parallel code.
+ *  7) Consider converting the lists to arrays for direct element access 
+ *  8) See if adding caching helps at all
  */
 
