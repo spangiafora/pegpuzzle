@@ -112,10 +112,6 @@ object App {
     getSlotContent(board, loc) == p
   }
 
-  def between(move: Move): Location = {
-    between(sourcePos(move), targetPos(move))
-  }
-
   /**
    * Assume abs(row(loc1) - row(loc2)) == 2 or zero
    * and    abs(column(loc1) - column(loc2)) == 2 
@@ -131,6 +127,13 @@ object App {
             else (row(loc1) min row(loc2)) + 1
 
     (r, c)
+  }
+
+  /**
+   * Same as above only applied to Move
+   */ 
+  def between(move: Move): Location = {
+    between(sourcePos(move), targetPos(move))
   }
 
   /**
@@ -189,8 +192,11 @@ object App {
     b2.exists(b => compareBoards(b, b1))
   }
 
-  /** construct all possible boards for this edgesize */
-  def mkAllBoards(edgesize: Int) = {
+  /** 
+   * construct all possible starting configurations for this edgesize.
+   * This returns a list of boards.
+   */
+  def mkAllBoards(edgesize: Int):BoardList = {
     val l = for {
       x <- 1 to edgesize;
       y <- 1 to x;
@@ -199,8 +205,11 @@ object App {
     l.toList
   }
 
-  /** construct all possible boards for this edgesize */
-  def getAllBoardLocations(edgesize: Int) = {
+  /** 
+   * construct all locations for this edgesize 
+   * This returns a list of locations
+   */
+  def getAllBoardLocations(edgesize: Int): List[Location] = {
     val l = for {
       x <- 1 to edgesize;
       y <- 1 to x;
