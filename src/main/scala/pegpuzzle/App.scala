@@ -405,7 +405,12 @@ object App {
     l.toList
   }
 
-  /** Solve board from all starting positions */
+  /**
+   * Solve board from all starting positions
+   * Two of the boards are very similar.  They are mirrors of each other.
+   * I left them in because, unliked the rotations, they lead to a distinct
+   * set of moves, even if those moves have a lot in common.
+   */
   def main(args : Array[String]) {
     var boardList = mkBoards(5)
     var boardMoves = addDummyMoveToBoards(boardList)
