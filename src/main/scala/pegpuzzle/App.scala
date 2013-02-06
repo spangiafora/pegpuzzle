@@ -44,9 +44,9 @@ object App {
   import SlotVal._
 
   // Because we are doing random access lookup on boards
-  // it would be more efficient to store them as arrays.
-  // For now I am going to stick with lists until I have 
-  // the solution working.
+  // it would be more efficient to store them as arrays
+  // or vectors.
+  // For now I am going to stick with lists.
   type Row           = List[SlotVal]
   type Board         = List[Row]
   type BoardMove     = (List[Row], Move)
@@ -409,7 +409,12 @@ object App {
   def main(args : Array[String]) {
     var boardList = mkBoards(5)
     var boardMoves = addDummyMoveToBoards(boardList)
-    for(path <- (solveBoardList(boardMoves, Nil))) println(path.reverse) 
+
+    // Print count of solutions
+    for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
+
+    // Print solutions themselves
+    // for(path <- (solveBoardList(boardMoves, Nil))) println(path.reverse) 
   }
 
   /**
@@ -453,13 +458,13 @@ object App {
 }
 
 /*  Things to try for the meetup
+ * 
  *  1) Get rid of the dummy start move
- *  2) Translate to Clojure
- *  3) Translate to Java 8
- *  4) Translate to Java 7
- *  5) Translate to Smalltalk? (Bigger project.  I don't know Smalltalk at all.)
- *  6) Convert to parallel code.
- *  7) Consider converting the lists to arrays for direct element access 
- *  8) See if adding caching helps at all
+ *  2) Convert to parallel code.
+ *  3) Translate to Clojure
+ *  4) Translate to Java 8
+ *  5) Translate to Java 7
+ *  6) Translate to Smalltalk? (Bigger project.  I don't know Smalltalk at all.)
+ *  7) See if adding caching helps at all
  */
 
