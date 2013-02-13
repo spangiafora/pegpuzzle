@@ -11,4 +11,4 @@ expected.  Which is good.
 
 
 
-Why Spangiafora? See page 16 of: http://www.downbeat.com/digitaledition/2011/DB201101/_art/DB201101.pdf
+Why "Spangiafora?" See page 16 of: http://www.downbeat.com/digitaledition/2011/DB201101/_art/DB201101.pdf
