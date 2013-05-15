@@ -417,18 +417,12 @@ object App {
   def main(args : Array[String]) {
     var boardList = mkBoards(5)
     var boardMoves = addDummyMoveToBoards(boardList)
-<<<<<<< HEAD
-//
-    for(path <- (solveBoardList(boardMoves, Nil))) println(path.reverse) 
-    println(solveBoardList(boardMoves, Nil) length)
-=======
 
     // Print count of solutions
     for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
 
     // Print solutions themselves
     // for(path <- (solveBoardList(boardMoves, Nil))) println(path.reverse) 
->>>>>>> 512dcb8a8e32f402869ffea996220f3fafb53281
   }
 
   /**
