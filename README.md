@@ -2,7 +2,6 @@ pegpuzzle
 =========
 
 Finger exercise for learning Scala.  Solve the triangle peg puzzle.
-It is not working yet (neither complete nor correct).
 
 ![board](https://raw.github.com/spangiafora/pegpuzzle/master/images/pegs.jpg)
 
@@ -11,3 +10,5 @@ be a place to begin.  So far it has raised a few more questions than I had
 expected.  Which is good.
 
 
+
+Why "Spangiafora?" See page 16 of: http://www.downbeat.com/digitaledition/2011/DB201101/_art/DB201101.pdf
