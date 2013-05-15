@@ -169,9 +169,12 @@ object App {
    * Build a board up by row starting at the base (the widest part)
    */
   def mkBoard(edgesize: Int, emptyLoc: Location) : Board = {
-    def makeReverseBoard(edgesize: Int): Board = 
-      if (edgesize == 0) Nil
-      else mkrow(edgesize, emptyLoc) :: makeReverseBoard(edgesize - 1)
+
+    def makeReverseBoard(edgesize: Int): Board = edgesize match {
+      case 0 => Nil
+      case _ => mkrow(edgesize, emptyLoc) :: makeReverseBoard(edgesize - 1)
+    }
+
     makeReverseBoard(edgesize).reverse
   }
 
@@ -409,7 +412,9 @@ object App {
   def main(args : Array[String]) {
     var boardList = mkBoards(5)
     var boardMoves = addDummyMoveToBoards(boardList)
+//
     for(path <- (solveBoardList(boardMoves, Nil))) println(path.reverse) 
+    println(solveBoardList(boardMoves, Nil) length)
   }
 
   /**
