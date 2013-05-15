@@ -484,12 +484,12 @@ object App {
 
 /*  Things to try for the meetup
  * 
- *  1) Get rid of the dummy start move
- *  2) Convert to parallel code.
+ *  1) Convert to parallel code w/akka
+ *  2) Get rid of the dummy start move
  *  3) Translate to Clojure
  *  4) Translate to Java 8
  *  5) Translate to Java 7
  *  6) Translate to Smalltalk? (Bigger project.  I don't know Smalltalk at all.)
- *  7) (Done) See if adding caching helps at all
+ *  7) (Done. Worked.) See if adding caching helps at all.  
  */
 
