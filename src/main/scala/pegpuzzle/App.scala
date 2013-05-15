@@ -350,11 +350,31 @@ object App {
   def applyMoves(board: Board, moves: Path): BoardMoveList = 
     moves.map(applyMove(board, _:Move))
 
+  def solveBoardMemo() : (BoardMove, Path) => Option[SolutionSet] = {
+    val s = scala.collection.mutable.HashMap[BoardMove, Option[SolutionSet]]()
+
+    (board, accu) => {
+      s.get(board) match {
+        case None => 
+          val sol = solveBoardLower(board, accu)
+          s.put(board, sol)
+          sol
+        case Some(s) => s
+      }
+    }
+  }
+
+  val solveBoard = solveBoardMemo
+
   /**
    * Find all solutions to the puzzle represented by "board"
    * List of moves are added to accu. 
+   * 
+   * I have added memoization via a mutable hashtable.  This should
+   * not break referential transparency so I don't think it is too
+   * big a deal.
    */ 
-  def solveBoard(board: BoardMove, accu: Path): Option[SolutionSet] = {
+  def solveBoardLower(board: BoardMove, accu: Path): Option[SolutionSet] = {
     val moves = findAllMoves(boardRows(board))
 
     if (moves isEmpty) {
@@ -420,9 +440,6 @@ object App {
 
     // Print count of solutions
     for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
-
-    // Print solutions themselves
-    // for(path <- (solveBoardList(boardMoves, Nil))) println(path.reverse) 
   }
 
   /**
@@ -473,6 +490,6 @@ object App {
  *  4) Translate to Java 8
  *  5) Translate to Java 7
  *  6) Translate to Smalltalk? (Bigger project.  I don't know Smalltalk at all.)
- *  7) See if adding caching helps at all
+ *  7) (Done) See if adding caching helps at all
  */
 
