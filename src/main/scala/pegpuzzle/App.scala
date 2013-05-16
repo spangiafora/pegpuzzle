@@ -350,8 +350,16 @@ object App {
   def applyMoves(board: Board, moves: Path): BoardMoveList = 
     moves.map(applyMove(board, _:Move))
 
+  /**
+   * Remember if the board is solvable from here down.
+   * NOTE: This does not work!!!!!
+   *       It will work fine for determining the NUMBER of solutions
+   *       but not for generating a complete LIST of solutions.
+   *       The problem is that I am caching too much.  I need to 
+   *       construct the solution to *this* path and return it.
+   */ 
   def solveBoardMemo() : (BoardMove, Path) => Option[SolutionSet] = {
-    val s = scala.collection.mutable.HashMap[BoardMove, Option[SolutionSet]]()
+    val s = scala.collection.mutable.HashMap[(BoardMove), Option[SolutionSet]]()
 
     (board, accu) => {
       s.get(board) match {
@@ -359,7 +367,7 @@ object App {
           val sol = solveBoardLower(board, accu)
           s.put(board, sol)
           sol
-        case Some(s) => s
+        case Some(p) => p
       }
     }
   }
@@ -415,6 +423,9 @@ object App {
   /** Canonical board plus dummy starting move */
   def canonicalBoardMove(): BoardMoveList = List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
 
+  /** Short solution board plus dummy starting move */
+  def shortSolution(): BoardMoveList = List((mkBoards(5).head, dummyMove))
+
   /**
    * Seed the process by adding a dummy start move to each board.  This could
    *  be done better.
@@ -431,15 +442,30 @@ object App {
   /**
    * Solve board from all starting positions
    * Two of the boards are very similar.  They are mirrors of each other.
-   * I left them in because, unliked the rotations, they lead to a distinct
+   * I left them in because, unlike the rotations, they lead to a distinct
    * set of moves, even if those moves have a lot in common.
    */
   def main(args : Array[String]) {
-    var boardList = mkBoards(5)
-    var boardMoves = addDummyMoveToBoards(boardList)
+    val boardList = mkBoards(5)
+    val boardMoves = addDummyMoveToBoards(boardList)
 
     // Print count of solutions
     for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
+
+/*
+    See note at SolveBoardMemo above for why this is currently broken.
+    for {
+      m <- boardList
+    } dumpBoard(m)
+
+    for {
+      m <- boardMoves
+      s <- solveBoard(m, Nil)
+      q <- s
+    } println(q)
+
+ */
+    // for(m <- boardMoves) println(solveBoard(m, Nil))
   }
 
   /**
