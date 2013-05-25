@@ -351,38 +351,10 @@ object App {
     moves.map(applyMove(board, _:Move))
 
   /**
-   * Remember if the board is solvable from here down.
-   * NOTE: This does not work!!!!!
-   *       It will work fine for determining the NUMBER of solutions
-   *       but not for generating a complete LIST of solutions.
-   *       The problem is that I am caching too much.  I need to 
-   *       construct the solution to *this* path and return it.
-   */ 
-  def solveBoardMemo() : (BoardMove, Path) => Option[SolutionSet] = {
-    val s = scala.collection.mutable.HashMap[(BoardMove), Option[SolutionSet]]()
-
-    (board, accu) => {
-      s.get(board) match {
-        case None => 
-          val sol = solveBoardLower(board, accu)
-          s.put(board, sol)
-          sol
-        case Some(p) => p
-      }
-    }
-  }
-
-  val solveBoard = solveBoardMemo
-
-  /**
    * Find all solutions to the puzzle represented by "board"
    * List of moves are added to accu. 
-   * 
-   * I have added memoization via a mutable hashtable.  This should
-   * not break referential transparency so I don't think it is too
-   * big a deal.
    */ 
-  def solveBoardLower(board: BoardMove, accu: Path): Option[SolutionSet] = {
+  def solveBoard(board: BoardMove, accu: Path): Option[SolutionSet] = {
     val moves = findAllMoves(boardRows(board))
 
     if (moves isEmpty) {
@@ -423,9 +395,6 @@ object App {
   /** Canonical board plus dummy starting move */
   def canonicalBoardMove(): BoardMoveList = List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
 
-  /** Short solution board plus dummy starting move */
-  def shortSolution(): BoardMoveList = List((mkBoards(5).head, dummyMove))
-
   /**
    * Seed the process by adding a dummy start move to each board.  This could
    *  be done better.
@@ -442,21 +411,15 @@ object App {
   /**
    * Solve board from all starting positions
    * Two of the boards are very similar.  They are mirrors of each other.
-   * I left them in because, unlike the rotations, they lead to a distinct
+   * I left them in because, unliked the rotations, they lead to a distinct
    * set of moves, even if those moves have a lot in common.
    */
   def main(args : Array[String]) {
-    val boardList = mkBoards(5)
-    val boardMoves = addDummyMoveToBoards(boardList)
+    var boardList = mkBoards(5)
+    var boardMoves = addDummyMoveToBoards(boardList)
 
     // Print count of solutions
-    for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
-
-/*
-    See note at SolveBoardMemo above for why this is currently broken.
-    for {
-      m <- boardList
-    } dumpBoard(m)
+    // for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
 
     for {
       m <- boardMoves
@@ -464,8 +427,8 @@ object App {
       q <- s
     } println(q)
 
- */
-    // for(m <- boardMoves) println(solveBoard(m, Nil))
+    // Print solutions themselves
+    // for(path <- (solveBoardList(boardMoves, Nil))) println(path.reverse) 
   }
 
   /**
@@ -510,12 +473,12 @@ object App {
 
 /*  Things to try for the meetup
  * 
- *  1) Convert to parallel code w/akka
- *  2) Get rid of the dummy start move
+ *  1) Get rid of the dummy start move
+ *  2) Convert to parallel code.
  *  3) Translate to Clojure
  *  4) Translate to Java 8
  *  5) Translate to Java 7
  *  6) Translate to Smalltalk? (Bigger project.  I don't know Smalltalk at all.)
- *  7) (Done. Worked.) See if adding caching helps at all.  
+ *  7) See if adding caching helps at all
  */
 
