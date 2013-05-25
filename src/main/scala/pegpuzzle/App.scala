@@ -352,22 +352,57 @@ object App {
 
   /**
    * Remember if the board is solvable from here down.
-   * NOTE: This does not work!!!!!
-   *       It will work fine for determining the NUMBER of solutions
-   *       but not for generating a complete LIST of solutions.
-   *       The problem is that I am caching too much.  I need to 
-   *       construct the solution to *this* path and return it.
    */ 
   def solveBoardMemo() : (BoardMove, Path) => Option[SolutionSet] = {
-    val s = scala.collection.mutable.HashMap[(BoardMove), Option[SolutionSet]]()
+    val s = scala.collection.mutable.HashMap[BoardMove, Option[SolutionSet]]()
 
+    // Use solveBoardLower to calculate the solution.  Cache the result
+    // with the current accumulator removed from each path, and then
+    // return the result for this instance (i.e. with the accu in place)
+
+    def calcAndCache(board: BoardMove, accu: Path): Option[SolutionSet] = {
+      val sol = solveBoardLower(board, accu)
+      val newsol = sol getOrElse Nil
+
+      if (newsol isEmpty) {
+        s.put(board, None)
+        None
+      } 
+      else {
+        val res = for {
+          l <- newsol
+          out = if (l.endsWith(accu)) l.dropRight(accu.size) else l
+        } yield out
+
+        s.put(board, Some(res))
+        Some(newsol)                // return the complete paths including current accu
+      }
+    }
+
+    // Add the current path (accu) to the head of each path in oss
+    def finishPaths(accu: Path, oss: Option[SolutionSet]): Option[SolutionSet] = {
+      if (oss == None) None else {
+        val l = oss.get
+        val res = for {
+          p <- l
+          out = p ++ accu
+        } yield out
+        Some(res) 
+      }
+    }
+
+    // once fetched from s, r is either 
+    // None              - no entry in cache
+    // Some(SolutionSet) - a cached solution
+    // Some(None)        - we know there is no solution
     (board, accu) => {
-      s.get(board) match {
-        case None => 
-          val sol = solveBoardLower(board, accu)
-          s.put(board, sol)
-          sol
-        case Some(p) => p
+      val r = s.get(board)
+ 
+      if (r isEmpty) {                               // nothing cached for this board
+        calcAndCache(board, accu)
+      }
+      else {
+        finishPaths(accu, r.get)                     // return accu + cached paths
       }
     }
   }
@@ -450,13 +485,14 @@ object App {
     val boardMoves = addDummyMoveToBoards(boardList)
 
     // Print count of solutions
-    for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
+    // for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
+    // for(m <- boardMoves) println(solveBoard(m, Nil))
 
-/*
-    See note at SolveBoardMemo above for why this is currently broken.
-    for {
-      m <- boardList
-    } dumpBoard(m)
+ /*
+  * for {
+  *   m <- boardList
+  * } dumpBoard(m)
+  */
 
     for {
       m <- boardMoves
@@ -464,7 +500,6 @@ object App {
       q <- s
     } println(q)
 
- */
     // for(m <- boardMoves) println(solveBoard(m, Nil))
   }
 
