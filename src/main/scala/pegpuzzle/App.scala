@@ -352,6 +352,11 @@ object App {
 
   /**
    * Remember if the board is solvable from here down.
+   * 
+   * Note: Due to the original way this was written I am doing double
+   *       work - adding the accu to the list of solutions and then
+   *       subtracting it.  I need to think of a better structure, 
+   *       but it works well enough that I am leaving it as is for now.
    */ 
   def solveBoardMemo() : (BoardMove, Path) => Option[SolutionSet] = {
     val s = scala.collection.mutable.HashMap[BoardMove, Option[SolutionSet]]()
