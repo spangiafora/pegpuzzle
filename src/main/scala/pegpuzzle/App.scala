@@ -91,7 +91,8 @@ object App {
 
       def rotateDiagRows(srcRow: Int, srcCol: Int): Board = {
         if (srcCol > sz) Nil
-        else rotateDiag(srcRow, srcCol) :: rotateDiagRows(srcRow + 1, srcCol + 1) 
+        else rotateDiag(srcRow, srcCol) :: rotateDiagRows(srcRow + 1, 
+                                                          srcCol + 1) 
       }
       rotateDiagRows(1, 1)
     }
@@ -145,7 +146,10 @@ object App {
     val ru = board.size   // upper limit on row
     val cu = row(loc)     // upper limit on col
 
-    (row(loc) > l) && (row(loc) <= ru) && (column(loc) > l) && (column(loc) <= cu)
+    ((row(loc) > l)    && 
+     (row(loc) <= ru)  && 
+     (column(loc) > l) && 
+     (column(loc) <= cu))
   }
 
   /*
@@ -380,12 +384,13 @@ object App {
         } yield out
 
         s.put(board, Some(res))
-        Some(newsol)                // return the complete paths including current accu
+        Some(newsol)   // return the complete paths including current accu
       }
     }
 
     // Add the current path (accu) to the head of each path in oss
-    def finishPaths(accu: Path, oss: Option[SolutionSet]): Option[SolutionSet] = {
+    def finishPaths(accu: Path, 
+                    oss: Option[SolutionSet]): Option[SolutionSet] = {
       if (oss == None) None else {
         val l = oss.get
         val res = for {
@@ -403,11 +408,11 @@ object App {
     (board, accu) => {
       val r = s.get(board)
  
-      if (r isEmpty) {                               // nothing cached for this board
+      if (r isEmpty) {                   // nothing cached for this board
         calcAndCache(board, accu)
       }
       else {
-        finishPaths(accu, r.get)                     // return accu + cached paths
+        finishPaths(accu, r.get)         // return accu + cached paths
       }
     }
   }
@@ -426,7 +431,8 @@ object App {
     val moves = findAllMoves(boardRows(board))
 
     if (moves isEmpty) {
-      if (pegsOnBoard(boardRows(board)) == 1) Some(List(lastMove(board) :: accu)) 
+      if (pegsOnBoard(boardRows(board)) == 1) 
+        Some(List(lastMove(board) :: accu)) 
       else None
     }
     else {
@@ -447,7 +453,8 @@ object App {
   /** The board most people start with
    * <pre>
    *  <code>
-   *  List(List(e), List(p, p), List(p, p, p), List(p, p, p, p), List(p, p, p, p, p))
+   *  List(List(e), List(p, p), List(p, p, p), 
+   *  List(p, p, p, p), List(p, p, p, p, p))
    * 
    *  or:
    *         e
@@ -461,7 +468,8 @@ object App {
   def canonicalBoard(): Board = mkBoards(5).tail.tail.tail.tail.head
 
   /** Canonical board plus dummy starting move */
-  def canonicalBoardMove(): BoardMoveList = List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
+  def canonicalBoardMove(): BoardMoveList = 
+    List((mkBoards(5).tail.tail.tail.tail.head, dummyMove))
 
   /** Short solution board plus dummy starting move */
   def shortSolution(): BoardMoveList = List((mkBoards(5).head, dummyMove))
@@ -490,21 +498,16 @@ object App {
     val boardMoves = addDummyMoveToBoards(boardList)
 
     // Print count of solutions
-    // for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
+    for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
     // for(m <- boardMoves) println(solveBoard(m, Nil))
 
- /*
-  * for {
-  *   m <- boardList
-  * } dumpBoard(m)
-  */
-
+    /*
     for {
       m <- boardMoves
       s <- solveBoard(m, Nil)
       q <- s
     } println(q)
-
+    */
     // for(m <- boardMoves) println(solveBoard(m, Nil))
   }
 
