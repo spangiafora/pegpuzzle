@@ -1,5 +1,5 @@
 package pegpuzzle
-
+import scala.language.postfixOps
 /**
  * Program to solve the "cracker barrel" triangle peg puzzle
  * 
@@ -497,18 +497,11 @@ object App {
     val boardList = mkBoards(5)
     val boardMoves = addDummyMoveToBoards(boardList)
 
-    // Print count of solutions
-    for(m <- boardMoves) println(solveBoard(m, Nil).flatten.size)
-    // for(m <- boardMoves) println(solveBoard(m, Nil))
-
-    /*
-    for {
+    val x = for {
       m <- boardMoves
       s <- solveBoard(m, Nil)
-      q <- s
-    } println(q)
-    */
-    // for(m <- boardMoves) println(solveBoard(m, Nil))
+    } yield s
+    println(x.flatten.size)
   }
 
   /**
