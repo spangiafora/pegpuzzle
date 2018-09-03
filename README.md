@@ -2,7 +2,7 @@ This code was written in 2012/2013.  ~~I just checked it (Aug 2018) and it won't
 
 August 21 - I just played around with it and it will build and run.  I had incompatible versions of software on my machine. 
 
-August 23, 2018  - Got it to produce the correct results.  --Now I need to remember how to re-enable the scala unit tests.-- September 2 - Turns out I was running an old old old version of sbt.  Removed and reinstalled and the tests run.
+August 23, 2018  - Got it to produce the correct results.  ~~Now I need to remember how to re-enable the scala unit tests.~~ September 2 - Turns out I was running an old old old version of sbt.  Removed and reinstalled and the tests run.
 
 pegpuzzle
 =========
