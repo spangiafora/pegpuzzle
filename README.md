@@ -1,15 +1,13 @@
-This code was written in 2012/2013.  ~~I just checked it (Aug 2018) and it won't build with the current configuration.  Once the config was tweaked to get past that problem I ran into what appears to be something that has changed in the Scala language.  I am on the fence as to whether it is worth updating, but in the meantime it is worth reviewing as once working code.~~
+This code was written in 2012/2013.  
 
-August 21 - I just played around with it and it will build and run.  I had incompatible versions of software on my machine. 
-
-August 23, 2018  - Got it to produce the correct results.  ~~Now I need to remember how to re-enable the scala unit tests.~~ September 2 - Turns out I was running an old old old version of sbt.  Removed and reinstalled and the tests run.
+2018 - Ran into some problems building and running.  Turned out I had incompatible versions of sof
 
 pegpuzzle
 =========
 
 Finger exercise for learning Scala.  Solve the triangle peg puzzle.
 
-Next steps:
+(Back to 2014...) Next steps:
 
 * Add concurrency via actors
 * See if structure can be changed to better support memoization
